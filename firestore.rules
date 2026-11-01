@@ -26,6 +26,11 @@ service cloud.firestore {
     }
     match /content/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
     match /quizzes/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
+    match /givings/{id} {
+      allow create: if isMember() && request.resource.data.uid == request.auth.uid && request.resource.data.confirmed == false;
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
     match /feedback/{id} { allow read, write: if isAdmin(); }
     match /texts/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
   }

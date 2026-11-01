@@ -340,7 +340,7 @@ function learnerPicker(){
 }
 function wirePicker(rerender){ document.querySelectorAll('#lp [data-l]').forEach(b=>b.onclick=()=>{ learnerId=b.dataset.l||null; rerender(); }); }
 async function saveKidResult(date,res){ const L=learner(); if(!L) return; const k={...(ACT.kids||{})}; k[L.id]={...(k[L.id]||{}),[date]:{...res,at:Date.now()}}; await saveAct({kids:k}); }
-const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['me','My progress']];
+const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['give','Giving'],['me','My progress']];
 let started=false;
 async function boot(){
   try{ PORTIONS=await loadJSON('portions.json'); }catch(e){ console.warn(e) }
@@ -420,7 +420,7 @@ async function saveAct(patch){ ACT={...ACT,...patch}; try{ await db.doc('activit
 function route(){
   const r=(location.hash||'#home').slice(1)||'home';
   document.querySelectorAll('#nav a').forEach(a=>{ if(a.dataset.r===r) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
-  const v={home:vHome,calendar:vCalendar,torah:vTorah,scriptures:vScriptures,hymns:vHymns,quiz:vQuiz,kids:vKids,library:vLibrary,teaching:vTeaching,me:vMe,admin:vAdmin}[r]||vHome;
+  const v={home:vHome,calendar:vCalendar,torah:vTorah,scriptures:vScriptures,hymns:vHymns,quiz:vQuiz,kids:vKids,library:vLibrary,teaching:vTeaching,give:vGive,me:vMe,admin:vAdmin}[r]||vHome;
   if(r==='admin'&&!isOwner) return vHome();
   window.scrollTo(0,0); v();
 }
@@ -694,6 +694,39 @@ function vTeaching(){
    </tbody></table></div></div>`;
 }
 
+// ---------- GIVING ----------
+const GIVE_REASONS=['Tithe','Offering','First fruits','Vow offering','Feast offering','Building / project','Other'];
+async function vGive(){
+  const g=CONTENT.settings||{}; const open=g.givingOpen===true||g.givingOpen==='true';
+  let mine=[]; try{ mine=(await db.collection('givings').where('uid','==',me.id).get()).docs.map(d=>d.data()).sort((a,b)=>b.at-a.at); }catch(e){}
+  const ways=[g.mtnCode?{k:'mtn',l:'MTN Mobile Money',v:g.mtnCode}:null,g.airtelCode?{k:'airtel',l:'Airtel Money',v:g.airtelCode}:null,g.payLink?{k:'card',l:'Card or online payment',v:g.payLink}:null].filter(Boolean);
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div><div class="eyebrow">Giving</div><h2>Tithes and offerings</h2><p class="muted small">“Bring all the tithes into the storehouse…” Give to the House by mobile money or card.</p></div>
+   ${open?'':'<div class="card row"><span class="pill warn">Coming soon</span><span class="small">Online giving is being set up. You can see how it will work below; payments open once the House activates them.</span></div>'}
+   <div class="grid g2">
+    <form class="card stack" id="gf">
+     <label class="f">What are you giving?<select id="gReason">${GIVE_REASONS.map(r=>`<option>${r}</option>`).join('')}</select></label>
+     <label class="f" id="gOtherWrap" hidden>Describe it<input type="text" id="gOther" placeholder="e.g. Sukkot offering"></label>
+     <label class="f">Amount (UGX)<input type="number" id="gAmt" min="500" step="500" required placeholder="e.g. 50000"></label>
+     <label class="f">How will you pay?<select id="gWay">${(ways.length?ways:[{k:'mtn',l:'MTN Mobile Money'},{k:'airtel',l:'Airtel Money'},{k:'card',l:'Card or online payment'}]).map(w=>`<option value="${w.k}">${w.l}</option>`).join('')}</select></label>
+     <label class="f">Your mobile money number (for MTN or Airtel)<input type="tel" id="gPhone" placeholder="07…"></label>
+     <div id="gHow" class="small"></div>
+     <label class="f">Payment reference / transaction ID (after you pay)<input type="text" id="gRef" placeholder="From the confirmation SMS"></label>
+     <button class="btn gold" ${open?'':'disabled'}>${open?'Record my giving':'Giving opens soon'}</button>
+    </form>
+    <div class="card stack"><div class="eyebrow">My giving record</div>
+     ${mine.length?mine.map(x=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px"><span><b>${esc(x.reason)}</b> <span class="muted small">${esc(fmtG(new Date(x.at)))} · ${esc(x.way)}</span></span><span>UGX ${Number(x.amount).toLocaleString('en-GB')} ${x.confirmed?'<span class="pill good">Received</span>':'<span class="pill">Recorded</span>'}</span></div>`).join(''):'<p class="muted small">Your tithes and offerings will be listed here.</p>'}
+    </div>
+   </div></div>`;
+  const how=()=>{ const w=$('#gWay').value; const x=ways.find(v=>v.k===w);
+    $('#gHow').innerHTML=!open?'<span class="muted">Payment details appear here once giving is active.</span>':w==='card'?(x?`<a class="btn sm" href="${esc(x.v)}" target="_blank" rel="noopener">Open the secure payment page</a>`:''):(x?`Pay to <b>${esc(x.v)}</b> (${w==='mtn'?'MTN':'Airtel'} merchant code, name “House of Israel”). Then enter the transaction ID below.`:'');
+    $('#gOtherWrap').hidden=$('#gReason').value!=='Other'; };
+  $('#gWay').onchange=how; $('#gReason').onchange=how; how();
+  $('#gf').onsubmit=async e=>{e.preventDefault(); if(!open) return;
+    const reason=$('#gReason').value==='Other'?($('#gOther').value.trim()||'Other'):$('#gReason').value;
+    try{ await db.collection('givings').add({uid:me.id,name:me.name||'',email:me.email,reason,amount:+$('#gAmt').value,way:$('#gWay').value,phone:$('#gPhone').value.trim(),ref:$('#gRef').value.trim(),at:Date.now(),confirmed:false}); toast('Thank you. Your giving is recorded.'); vGive(); }catch(err){ toast('Could not record: '+(err.code||err.message)); } };
+}
+
 // ---------- MY PROGRESS ----------
 function vMe(){
   const a=ACT||{}; const reads=Object.values(a.read||{}).filter(Boolean).length; const qz=Object.values(a.quiz||{});
@@ -729,11 +762,11 @@ function vMe(){
 // ---------- ADMIN ----------
 let adminTab='people';
 async function vAdmin(){
-  const tabs=[['people','Members & requests'],['quiz','Quiz builder'],['schedule','Teaching schedule'],['links','Library links'],['hymns','Edit hymns'],['settings','Settings & calendar'],['feedback','Feedback for Claude']];
+  const tabs=[['people','Members & requests'],['quiz','Quiz builder'],['schedule','Teaching schedule'],['links','Library links'],['hymns','Edit hymns'],['settings','Settings & calendar'],['giving','Giving received'],['feedback','Feedback for Claude']];
   $('#app').innerHTML=`<div class="stack" style="gap:16px"><div><div class="eyebrow">Administrator</div><h2>Run the House</h2></div>
    <div class="row">${tabs.map(([k,l])=>`<button class="btn sm ${adminTab===k?'':'ghost'}" data-t="${k}">${l}</button>`).join('')}</div><div id="adm"><p class="muted">Loading…</p></div></div>`;
   document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{adminTab=b.dataset.t;vAdmin()});
-  ({people:aPeople,quiz:aQuiz,schedule:aSchedule,links:aLinks,hymns:aHymns,settings:aSettings,feedback:aFeedback})[adminTab]();
+  ({people:aPeople,quiz:aQuiz,schedule:aSchedule,links:aLinks,hymns:aHymns,settings:aSettings,giving:aGiving,feedback:aFeedback})[adminTab]();
 }
 async function saveContent(id,data){ CONTENT[id]=data; await db.doc('content/'+id).set(data); toast('Saved'); }
 async function aPeople(){
@@ -777,6 +810,14 @@ async function aPeople(){
   document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.clear).delete(); toast('They can apply again'); aPeople(); });
   document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{ if(b.dataset.armed){ await db.doc('members/'+b.dataset.revoke).update({revoked:true}); toast('Access removed'); aPeople(); } else { b.dataset.armed=1; b.textContent='Confirm remove'; } });
   document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async()=>{ await db.doc('members/'+b.dataset.restore).update({revoked:false}); toast('Access restored'); aPeople(); });
+}
+async function aGiving(){
+  let items=[]; try{ items=(await db.collection('givings').get()).docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>b.at-a.at); }catch(e){}
+  const tot={}; items.forEach(x=>tot[x.reason]=(tot[x.reason]||0)+Number(x.amount||0));
+  $('#adm').innerHTML=`<div class="stack" style="gap:16px"><div class="card stack"><div class="eyebrow">Totals recorded</div><div class="row">${Object.entries(tot).map(([k,v])=>`<span class="pill gold">${esc(k)}: UGX ${v.toLocaleString('en-GB')}</span>`).join('')||'<span class="muted small">Nothing recorded yet. Turn giving on in Settings when the payment accounts are ready.</span>'}</div></div>
+   <div class="card tablewrap"><table><thead><tr><th>Date</th><th>Member</th><th>For</th><th>UGX</th><th>Paid by</th><th>Reference</th><th></th></tr></thead><tbody>
+   ${items.map(x=>`<tr><td>${esc(fmtG(new Date(x.at)))}</td><td>${esc(x.name||x.email)}</td><td>${esc(x.reason)}</td><td>${Number(x.amount).toLocaleString('en-GB')}</td><td>${esc(x.way)} ${esc(x.phone||'')}</td><td>${esc(x.ref||'')}</td><td>${x.confirmed?'<span class="pill good">Received</span>':`<button class="btn sm" data-conf="${esc(x.id)}">Mark received</button>`}</td></tr>`).join('')}</tbody></table></div></div>`;
+  document.querySelectorAll('[data-conf]').forEach(b=>b.onclick=async()=>{ await db.doc('givings/'+b.dataset.conf).update({confirmed:true}); toast('Marked received'); aGiving(); });
 }
 async function aFeedback(){
   let items=[]; try{ items=(await db.collection('feedback').get()).docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||0)-(a.at||0)); }catch(e){}
@@ -854,6 +895,11 @@ function aSettings(){
     <label class="f">Printing: name<input type="text" id="spn" value="${esc(s.printerName||'Julius Ariyong')}"></label>
     <label class="f">Printing: email<input type="email" id="spe" value="${esc(s.printerEmail||'')}"></label>
     <label class="f">Administrator email (receives requests and Monday quiz reminders)<input type="email" id="sae" value="${esc(s.adminEmail||'')}"></label>
+    <div class="eyebrow" style="margin-top:8px">Giving (tithes & offerings)</div>
+    <label class="row small"><input type="checkbox" id="sgo" ${s.givingOpen===true||s.givingOpen==='true'?'checked':''}> Giving is open to members</label>
+    <label class="f">MTN MoMo merchant code<input type="text" id="smtn" value="${esc(s.mtnCode||'')}"></label>
+    <label class="f">Airtel Money merchant code<input type="text" id="sair" value="${esc(s.airtelCode||'')}"></label>
+    <label class="f">Online payment link (Flutterwave, Pesapal, etc.)<input type="url" id="spl" value="${esc(s.payLink||'')}"></label>
     <button class="btn" id="ss" style="align-self:flex-start">Save</button></div>
    <div class="card stack"><div class="eyebrow">Load House data</div>
     <p class="small muted">Loads the YAH Scriptures, the hymn book and the starting schedule and quiz from the House data file. Do this once; loading again replaces the texts.</p>
@@ -873,7 +919,7 @@ function aSettings(){
       for(const [id,v] of Object.entries(D.quizzes||{})){ const ex=await db.doc('quizzes/'+id).get(); if(!ex.exists) await db.doc('quizzes/'+id).set(v); }
       SCR=null; HYMNS=[]; await loadContent(); msg.textContent='All House data loaded.'; toast('House data loaded');
     }catch(err){ msg.textContent='Could not load: '+(err.message||err.code); } };
-  $('#ss').onclick=()=>saveContent('settings',{youtube:$('#sy').value.trim(),printerName:$('#spn').value.trim(),printerEmail:$('#spe').value.trim(),adminEmail:$('#sae').value.trim()});
+  $('#ss').onclick=()=>saveContent('settings',{youtube:$('#sy').value.trim(),printerName:$('#spn').value.trim(),printerEmail:$('#spe').value.trim(),adminEmail:$('#sae').value.trim(),givingOpen:$('#sgo').checked,mtnCode:$('#smtn').value.trim(),airtelCode:$('#sair').value.trim(),payLink:$('#spl').value.trim()});
   const saveCal=async()=>{ await saveContent('calendar',cal); ANCHORS=[DEFAULT_ANCHOR,...cal.anchors]; LEAP_AFTER12=cal.leap; aSettings(); };
   $('#caadd').onclick=()=>{ if(!$('#cad').value||!$('#cam').value) return toast('Choose a date and month'); cal.anchors.push({date:$('#cad').value,month:+$('#cam').value}); saveCal(); };
   $('#cleapadd').onclick=()=>{ if(!$('#cleap').value) return; cal.leap.push($('#cleap').value); saveCal(); };
