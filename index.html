@@ -349,13 +349,13 @@ function renderAuth(tab='signin',msg=''){
    <div class="row"><button class="btn sm ${tab==='signin'?'':'ghost'}" id="tSign">Sign in</button><button class="btn sm ${tab==='apply'?'':'ghost'}" id="tApply">Apply for access</button></div>
    ${msg?`<p class="small" style="color:var(--warn)">${esc(msg)}</p>`:''}
    ${tab==='signin'?`<h2>Welcome to the House</h2>
-   <p class="muted small">Sign in with the email you applied with. The first password for everyone is <b>${FIRST_PASSWORD}</b>; change it after you sign in.</p>
+   <p class="muted small">Sign in with the email you applied with and the first password the House gave you when you were approved. You can change it after you sign in.</p>
    <form id="lf" class="stack"><label class="f">Email<input type="email" id="lgEmail" required autocomplete="username"></label>
    <label class="f">Password<input type="password" id="lgPw" required autocomplete="current-password"></label>
    <p id="lgErr" class="small" style="color:var(--bad)" hidden></p>
    <button class="btn" type="submit">Enter</button></form>
    <div class="row small"><button class="btn ghost sm" id="forgot">Forgot password</button><button class="btn ghost sm" id="adminSetup">Administrator first-time setup</button></div>`:
-   `<h2>Apply to enter</h2><p class="muted small">This is the private home of the House of Israel. Send your details and the administrator will approve you. Then sign in with your email and the password <b>${FIRST_PASSWORD}</b>.</p>
+   `<h2>Apply to enter</h2><p class="muted small">This is the private home of the House of Israel. Send your details and the administrator will approve you. You will then receive your first password.</p>
    <form id="af" class="stack"><label class="f">Full name<input type="text" id="apName" required autocomplete="name"></label>
    <label class="f">Email<input type="email" id="apEmail" required autocomplete="email"></label>
    <label class="f">Phone number<input type="tel" id="apPhone" required autocomplete="tel" placeholder="+256 …"></label>
@@ -364,7 +364,7 @@ function renderAuth(tab='signin',msg=''){
   $('#tSign').onclick=()=>renderAuth('signin'); $('#tApply').onclick=()=>renderAuth('apply');
   $('#lf')?.addEventListener('submit',async e=>{e.preventDefault(); const er=$('#lgErr'); er.hidden=true;
     try{ await auth.signInWithEmailAndPassword($('#lgEmail').value.trim(),$('#lgPw').value); }
-    catch(err){ er.hidden=false; er.textContent=/user-not-found|invalid-credential|wrong-password|invalid-login/.test(err.code)?'That email and password do not match an approved member. If you were just approved, use '+FIRST_PASSWORD+'.':'Could not sign in: '+(err.message||err.code); } });
+    catch(err){ er.hidden=false; er.textContent=/user-not-found|invalid-credential|wrong-password|invalid-login/.test(err.code)?'That email and password do not match an approved member.':'Could not sign in: '+(err.message||err.code); } });
   $('#forgot')?.addEventListener('click',async()=>{ const em=$('#lgEmail').value.trim(); if(!em) return toast('Type your email first'); try{ await auth.sendPasswordResetEmail(em); toast('A reset link was sent to '+em);}catch(e){ toast('Could not send reset: '+(e.code||'')) } });
   $('#adminSetup')?.addEventListener('click',async()=>{ const em=$('#lgEmail').value.trim().toLowerCase(), pw=$('#lgPw').value;
     if(!ADMINS.includes(em)) return toast('Only the administrator email can use this.'); if(pw.length<8) return toast('Choose a password of at least 8 characters, then press this again.');
@@ -372,7 +372,7 @@ function renderAuth(tab='signin',msg=''){
   $('#af')?.addEventListener('submit',async e=>{e.preventDefault();
     const email=$('#apEmail').value.trim().toLowerCase();
     const data={name:$('#apName').value.trim(),email,phone:$('#apPhone').value.trim(),status:'pending',createdAt:Date.now()};
-    try{ await db.doc('applications/'+email).set(data); $('#app').innerHTML=`<div class="gate card stack"><h2>Request sent</h2><p>Thank you, ${esc(data.name)}. You will receive an email when the administrator approves you. Then sign in here with <b>${esc(email)}</b> and the password <b>${FIRST_PASSWORD}</b>.</p><button class="btn ghost" id="back">Back to sign in</button></div>`; $('#back').onclick=()=>renderAuth('signin'); }
+    try{ await db.doc('applications/'+email).set(data); $('#app').innerHTML=`<div class="gate card stack"><h2>Request sent</h2><p>Thank you, ${esc(data.name)}. You will receive an email when the administrator approves you. Then sign in here with <b>${esc(email)}</b> and the first password the House sends you.</p><button class="btn ghost" id="back">Back to sign in</button></div>`; $('#back').onclick=()=>renderAuth('signin'); }
     catch(err){ toast(err.code==='permission-denied'?'A request for this email already exists. Please wait for approval.':'Could not send: '+(err.message||err.code)); } });
 }
 async function loadContent(){
@@ -732,7 +732,7 @@ async function aPeople(){
       const uid=cred.user.uid; await sec.auth().signOut();
       await db.doc('members/'+uid).set({name:a.name,email:a.email,phone:a.phone,approvedAt:Date.now(),mustChange:true});
       await db.doc('applications/'+a.id).update({status:'approved',uid,approvedAt:Date.now()});
-      toast('Approved '+a.name+'. They can sign in now.'); aPeople();
+      toast('Approved '+a.name+'. Send them their first password: '+FIRST_PASSWORD); aPeople();
     }catch(e){ b.disabled=false; b.textContent='Approve'; toast(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'?'This email already has a login with a changed password. Restore them from the members list.':'Could not approve: '+(e.code||e.message)); } });
   document.querySelectorAll('[data-no]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.no).update({status:'declined'}); toast('Declined'); aPeople(); });
   document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.clear).delete(); toast('They can apply again'); aPeople(); });
