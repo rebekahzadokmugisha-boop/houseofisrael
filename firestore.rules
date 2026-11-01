@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
-    function isAdmin() { return signedIn() && request.auth.token.email in ['rebekahzadokmugisha@gmail.com']; }
+    function isAdmin() { return signedIn() && request.auth.token.email in ['rebekahzadokmugisha@gmail.com', 'zadokitefamily@gmail.com']; }
     function isMember() {
       return signedIn()
         && exists(/databases/$(database)/documents/members/$(request.auth.uid))
@@ -26,6 +26,7 @@ service cloud.firestore {
     }
     match /content/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
     match /quizzes/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
+    match /feedback/{id} { allow read, write: if isAdmin(); }
     match /texts/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
   }
 }

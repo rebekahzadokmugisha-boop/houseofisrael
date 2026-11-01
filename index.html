@@ -175,7 +175,7 @@ html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-b
 <script>
 "use strict";
 const FB_CONFIG={apiKey:"AIzaSyDW3yCWrgKmbAyHdEwnTZloK0yDeeHD640",authDomain:"house-of-israel.firebaseapp.com",projectId:"house-of-israel",storageBucket:"house-of-israel.firebasestorage.app",messagingSenderId:"385499051298",appId:"1:385499051298:web:90fce55d337499fcefa17b"};
-const ADMINS=["rebekahzadokmugisha@gmail.com"];
+const ADMINS=["rebekahzadokmugisha@gmail.com","zadokitefamily@gmail.com"];
 // ---------- emblem stars ----------
 (function(){const g=document.getElementById('stars');let s='';for(let i=0;i<12;i++){const a=Math.PI*(1.08+0.84*i/11);const x=60+42*Math.cos(a),y=58+42*Math.sin(a);s+=`<path transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(.9)" d="M0-4 1.1-1.3 4-1.2 1.8.6 2.5 3.4 0 1.8-2.5 3.4-1.8.6-4-1.2-1.1-1.3Z"/>`}g.innerHTML=s})();
 
@@ -191,7 +191,7 @@ const ordinal=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-const FIRST_PASSWORD='Pesach123!';
+const FIRST_PASSWORD='Pesach753';
 
 // ---------- sunset for Kampala (NOAA approximation) ----------
 const LAT=0.3476, LON=32.5825, TZ=3;
@@ -328,6 +328,18 @@ async function passageHTML(ref){
 let db=null, auth=null, me=null, isOwner=false, sample=false;
 let CONTENT={settings:{},schedule:{weeks:{}},links:{items:[]},hymnEdits:{},calendar:{}};
 let ACT=null;
+// ---- learners: the member and up to 5 children ----
+let learnerId=null; // null = the member
+const bandOf=age=>age<=7?'young':age<=14?'older':'adult';
+const BAND_LABEL={young:'Ages 0–7',older:'Ages 8–14',adult:'Adults'};
+function kids(){ return (ACT&&ACT.children)||[] }
+function learner(){ return kids().find(c=>c.id===learnerId)||null }
+function learnerPicker(){
+  if(!kids().length) return '';
+  return `<div class="row small" id="lp"><span class="muted">Doing this as:</span><button class="btn sm ${learnerId?'ghost':''}" data-l="">${esc((me.name||'Me').split(' ')[0])}</button>${kids().map(c=>`<button class="btn sm ${learnerId===c.id?'':'ghost'}" data-l="${esc(c.id)}">${esc(c.name)} · ${c.age}</button>`).join('')}</div>`;
+}
+function wirePicker(rerender){ document.querySelectorAll('#lp [data-l]').forEach(b=>b.onclick=()=>{ learnerId=b.dataset.l||null; rerender(); }); }
+async function saveKidResult(date,res){ const L=learner(); if(!L) return; const k={...(ACT.kids||{})}; k[L.id]={...(k[L.id]||{}),[date]:{...res,at:Date.now()}}; await saveAct({kids:k}); }
 const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['me','My progress']];
 let started=false;
 async function boot(){
@@ -585,13 +597,14 @@ function quizBlock(qs,key,date,done){
     ${done&&q.ref?`<div class="small muted">${esc(q.ref)}</div>`:''}</div>`).join('');
 }
 async function vQuiz(){
+  const L=learner(); if(L&&bandOf(L.age)!=='adult') return vKids();
   const mid=new Date(); mid.setHours(0,0,0,0); const w=portionFor(mid);
   $('#app').innerHTML=`<div class="card"><p class="muted">Loading this week’s quiz…</p></div>`;
   const quiz=await getQuiz(w.date);
-  const done=ACT?.quiz?.[w.date];
+  const done=L?(ACT?.kids?.[L.id]?.[w.date]):ACT?.quiz?.[w.date];
   if(!quiz||!quiz.adult?.length){ $('#app').innerHTML=`<div class="card stack"><div class="eyebrow">Weekly quiz · ${esc(portionTitle(w))}</div><h2>This week’s quiz is being prepared</h2><p class="muted">Come back after Monday’s Torah portion email.</p></div>`; return; }
-  $('#app').innerHTML=`<div class="stack" style="gap:16px"><div class="card stack">
-    <div class="eyebrow">Weekly quiz · Shabbat ${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</div>
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">${learnerPicker()}<div class="card stack">
+    <div class="eyebrow">Weekly quiz${L?' · '+esc(L.name):''} · Shabbat ${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</div>
     <h2>${esc(portionTitle(w))}: the details</h2>
     <p class="muted small">Every answer is in this week’s portion (${esc(w.torah)}) in the YAH Scriptures. ${done?`You scored <b>${done.score} of ${done.total}</b>.`:''}</p>
     <form id="qf" class="stack">${quizBlock(quiz.adult,'a',w.date,done)}
@@ -600,8 +613,10 @@ async function vQuiz(){
     const answers=quiz.adult.map((q,i)=>{const r=document.querySelector(`input[name=a${i}]:checked`);return r?+r.value:null});
     if(answers.some(a=>a===null)) return toast('Answer every question first');
     const score=answers.filter((a,i)=>a===quiz.adult[i].answer).length;
-    await saveAct({quiz:{...(ACT.quiz||{}),[w.date]:{score,total:answers.length,answers,at:Date.now()}}});
-    toast(`You scored ${score} of ${answers.length}`); vQuiz(); };
+    if(L) await saveKidResult(w.date,{score,total:answers.length,answers,kind:'adult'});
+    else await saveAct({quiz:{...(ACT.quiz||{}),[w.date]:{score,total:answers.length,answers,at:Date.now()}}});
+    toast(`${L?L.name+' scored':'You scored'} ${score} of ${answers.length}`); vQuiz(); };
+  wirePicker(vQuiz);
 }
 
 // ---------- KIDS ----------
@@ -625,19 +640,24 @@ async function vKids(){
   const mid=new Date(); mid.setHours(0,0,0,0); const w=portionFor(mid);
   const quiz=await getQuiz(w.date);
   const words=quiz?.words||[]; const ws=makeWordSearch(words,12,w.date.split('-').join('')%2147483647||7);
-  const found=new Set();
+  const found=new Set(); const L=learner(); const band=L?bandOf(L.age):null;
+  if(band==='adult'){ return vQuiz(); }
+  const prev=L?ACT?.kids?.[L.id]?.[w.date]:null;
+  const showOlder=!band||band==='older', showYoung=!band||band==='young';
+  const kq=(quiz?.kids||[]).slice(0,band==='young'?4:undefined);
   $('#app').innerHTML=`<div class="stack" style="gap:16px">
-   <div><div class="eyebrow">Children · ${esc(portionTitle(w))}</div><h2>Shabbat school corner</h2></div>
+   <div><div class="eyebrow">Children · ${esc(portionTitle(w))}</div><h2>${L?esc(L.name)+'’s Torah corner':'Shabbat school corner'}</h2>${L?`<div class="muted small">${BAND_LABEL[band]}${prev?` · this week: ${prev.score} of ${prev.total}`:''}</div>`:''}</div>
+   ${learnerPicker()}${!kids().length?'<p class="small muted">Parents: add your children under <a href="#me">My progress</a> so each child can do their own exercises and you can follow their progress.</p>':''}
    <div class="grid g2">
-    <div class="card stack"><div class="eyebrow">Ages 8–14 · Word search</div>
+    ${showOlder?`<div class="card stack"><div class="eyebrow">Ages 8–14 · Word search</div>
      ${ws.placed.length?`<p class="small muted">Tap the first letter of a word, then its last letter.</p>
      <div class="ws" id="ws" style="grid-template-columns:repeat(${ws.size},1fr)">${ws.g.flat().map((ch,i)=>`<button data-i="${i}" aria-label="${ch}">${ch}</button>`).join('')}</div>
      <div class="words" id="wsWords">${ws.placed.map(p=>`<span class="pill" data-w="${p.w}">${p.w}</span>`).join('')}</div>`:'<p class="muted">This week’s word search is being prepared.</p>'}
+    </div>`:''}
+    <div class="card stack"><div class="eyebrow">${band==='young'?'Ages 0–7 · Easy questions (read them together)':'Ages 8–14 · Questions'}</div>
+     ${kq.length?`<form id="kq" class="stack">${quizBlock(kq,'k',w.date,null)}<button class="btn gold" type="submit">Check my answers</button></form><p id="kres" class="small"></p>`:'<p class="muted">Questions coming soon.</p>'}
     </div>
-    <div class="card stack"><div class="eyebrow">Ages 8–14 · Questions</div>
-     ${quiz?.kids?.length?`<form id="kq" class="stack">${quizBlock(quiz.kids,'k',w.date,null)}<button class="btn gold" type="submit">Check my answers</button></form><p id="kres" class="small"></p>`:'<p class="muted">Questions coming soon.</p>'}
-    </div>
-    <div class="card stack"><div class="eyebrow">Ages 0–7 · Colouring</div><p>Two colouring pages from this week’s portion are printed for class each Shabbat.</p>${quiz?.coloring?`<p class="small">${esc(quiz.coloring)}</p>`:''}</div>
+    ${showYoung?`<div class="card stack"><div class="eyebrow">Ages 0–7 · Colouring</div><p>Two colouring pages from this week’s portion are printed for class each Shabbat.</p>${quiz?.coloring?`<p class="small">${esc(quiz.coloring)}</p>`:''}</div>`:''}
    </div></div>`;
   let first=null;
   document.querySelectorAll('#ws button').forEach(b=>b.onclick=()=>{
@@ -648,7 +668,8 @@ async function vKids(){
     if(hit&&!found.has(hit.w)){ found.add(hit.w); hit.cells.forEach(c=>document.querySelector(`#ws [data-i="${c}"]`).classList.add('found')); document.querySelector(`[data-w="${hit.w}"]`).classList.add('done');
       if(found.size===ws.placed.length) toast('You found every word!'); }
   });
-  $('#kq')?.addEventListener('submit',e=>{e.preventDefault(); let s=0; quiz.kids.forEach((q,i)=>{const r=document.querySelector(`input[name=k${i}]:checked`); document.querySelectorAll(`input[name=k${i}]`).forEach(x=>{x.closest('.opt').classList.toggle('right',+x.value===q.answer)}); if(r&&+r.value===q.answer)s++; if(r&&+r.value!==q.answer) r.closest('.opt').classList.add('wrong');}); $('#kres').textContent=`${s} of ${quiz.kids.length} right.`});
+  wirePicker(vKids);
+  $('#kq')?.addEventListener('submit',async e=>{e.preventDefault(); let s=0; kq.forEach((q,i)=>{const r=document.querySelector(`input[name=k${i}]:checked`); document.querySelectorAll(`input[name=k${i}]`).forEach(x=>{x.closest('.opt').classList.toggle('right',+x.value===q.answer)}); if(r&&+r.value===q.answer)s++; if(r&&+r.value!==q.answer) r.closest('.opt').classList.add('wrong');}); $('#kres').textContent=`${s} of ${kq.length} right.`; if(L){ await saveKidResult(w.date,{score:s,total:kq.length,kind:band}); }});
 }
 
 // ---------- LIBRARY ----------
@@ -687,6 +708,11 @@ function vMe(){
    <div class="card stack"><div class="eyebrow">Recent weeks</div>
     ${recent.map(w=>{const q=a.quiz?.[w.date];return `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><span><b>${esc(portionTitle(w))}</b> <span class="muted small">${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</span></span><span class="row">${a.read?.[w.date]?'<span class="pill good">Read</span>':'<span class="pill">Not read</span>'}${q?`<span class="pill gold">Quiz ${q.score}/${q.total}</span>`:''}</span></div>`}).join('')}
    </div>
+   <div class="card stack"><div class="eyebrow">My children · ${kids().length} of 5</div>
+    <p class="small muted">Add each child with their name and age. They do the exercises for their age group (0–7, 8–14, or the adult quiz from 15) under “Weekly quiz” or “Children”, and you see their progress here.</p>
+    ${kids().map(c=>{const r=ACT?.kids?.[c.id]||{};const n=Object.keys(r).length;const last=Object.keys(r).sort().pop();return `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><span><b>${esc(c.name)}</b> <span class="muted small">age ${c.age} · ${BAND_LABEL[bandOf(c.age)]}</span></span><span class="row small">${n?`<span class="pill gold">${n} week${n>1?'s':''} done</span>`:'<span class="pill">No exercises yet</span>'}${last?`<span class="pill">Last: ${r[last].score}/${r[last].total}</span>`:''}<button class="btn ghost sm" data-delkid="${esc(c.id)}">Remove</button></span></div>`}).join('')}
+    ${kids().length<5?`<form id="kidf" class="row"><input type="text" id="kidName" placeholder="Child’s name" required style="flex:2;min-width:160px"><input type="number" id="kidAge" placeholder="Age" min="1" max="17" required style="width:90px"><button class="btn sm">Add child</button></form>`:'<p class="small muted">You have added the maximum of 5 children.</p>'}
+   </div>
    ${`<div class="card stack"><div class="eyebrow">${me.mustChange?'Set your own password':'Change password'}</div>
     <form id="pwf" class="stack" style="max-width:380px"><label class="f">New password<input type="password" id="pw1" minlength="6" required autocomplete="new-password"></label>
     <label class="f">Repeat new password<input type="password" id="pw2" minlength="6" required autocomplete="new-password"></label><button class="btn">Save password</button></form>
@@ -696,16 +722,18 @@ function vMe(){
     try{ await auth.currentUser.updatePassword($('#pw1').value); if(me.mustChange){ try{ await db.doc('members/'+me.id).update({mustChange:false}); }catch(e){} me.mustChange=false; } toast('Password changed'); e.target.reset(); }
     catch(err){ toast(err.code==='auth/requires-recent-login'?'For safety, sign out and sign in again, then change it.':'Could not change password: '+err.code) } });
   $('#signout')?.addEventListener('click',()=>{ location.hash=''; auth.signOut(); });
+  $('#kidf')?.addEventListener('submit',async e=>{e.preventDefault(); if(kids().length>=5) return; const c={id:'c'+Date.now().toString(36),name:$('#kidName').value.trim(),age:Math.max(1,Math.min(17,+$('#kidAge').value||0))}; await saveAct({children:[...kids(),c]}); toast(c.name+' added'); vMe(); });
+  document.querySelectorAll('[data-delkid]').forEach(b=>b.onclick=async()=>{ if(!b.dataset.armed){ b.dataset.armed=1; b.textContent='Confirm remove'; return; } await saveAct({children:kids().filter(c=>c.id!==b.dataset.delkid)}); if(learnerId===b.dataset.delkid) learnerId=null; vMe(); });
 }
 
 // ---------- ADMIN ----------
 let adminTab='people';
 async function vAdmin(){
-  const tabs=[['people','Members & requests'],['quiz','Quiz builder'],['schedule','Teaching schedule'],['links','Library links'],['hymns','Edit hymns'],['settings','Settings & calendar']];
+  const tabs=[['people','Members & requests'],['quiz','Quiz builder'],['schedule','Teaching schedule'],['links','Library links'],['hymns','Edit hymns'],['settings','Settings & calendar'],['feedback','Feedback for Claude']];
   $('#app').innerHTML=`<div class="stack" style="gap:16px"><div><div class="eyebrow">Administrator</div><h2>Run the House</h2></div>
    <div class="row">${tabs.map(([k,l])=>`<button class="btn sm ${adminTab===k?'':'ghost'}" data-t="${k}">${l}</button>`).join('')}</div><div id="adm"><p class="muted">Loading…</p></div></div>`;
   document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{adminTab=b.dataset.t;vAdmin()});
-  ({people:aPeople,quiz:aQuiz,schedule:aSchedule,links:aLinks,hymns:aHymns,settings:aSettings})[adminTab]();
+  ({people:aPeople,quiz:aQuiz,schedule:aSchedule,links:aLinks,hymns:aHymns,settings:aSettings,feedback:aFeedback})[adminTab]();
 }
 async function saveContent(id,data){ CONTENT[id]=data; await db.doc('content/'+id).set(data); toast('Saved'); }
 async function aPeople(){
@@ -716,7 +744,18 @@ async function aPeople(){
   const pending=apps.filter(a=>a.status==='pending'), declined=apps.filter(a=>a.status==='declined');
   const members=Object.entries(mem).map(([uid,m])=>({uid,...m}));
   const row=a=>{const x=acts[a.uid]||{};const q=Object.values(x.quiz||{});return `<tr><td><b>${esc(a.name)}</b>${a.revoked?' <span class="pill bad">Removed</span>':''}</td><td>${esc(a.email)}</td><td>${esc(a.phone)}</td><td>${x.visits||0}</td><td>${x.lastVisit?esc(fmtG(new Date(x.lastVisit))):'—'}</td><td>${Object.values(x.read||{}).filter(Boolean).length}</td><td>${q.length}</td><td>${a.revoked?`<button class="btn ghost sm" data-restore="${a.uid}">Restore</button>`:`<button class="btn ghost sm" data-revoke="${a.uid}">Remove</button>`}</td></tr>`};
+  const now=Date.now(), today=isoLocal(new Date());
+  const span=d=>{ const from=isoLocal(new Date(now-(d-1)*DAY)); const A=Object.values(acts); return {
+    active:A.filter(a=>Object.keys(a.days||{}).some(x=>x>=from&&x<=today)).length,
+    quizzes:A.reduce((n,a)=>n+Object.values(a.quiz||{}).filter(q=>q.at>=now-d*DAY).length+Object.values(a.kids||{}).reduce((m,k)=>m+Object.values(k).filter(q=>q.at>=now-d*DAY).length,0),0),
+    joined:members.filter(m=>m.approvedAt>=now-d*DAY).length,
+    asked:apps.filter(a=>a.createdAt>=now-d*DAY).length }; };
+  const S={Today:span(1),'Last 7 days':span(7),'Last 30 days':span(30)};
+  const childCount=Object.values(acts).reduce((n,a)=>n+(a.children||[]).length,0);
   $('#adm').innerHTML=`<div class="stack" style="gap:16px">
+   <div class="card stack"><div class="eyebrow">House activity · ${members.filter(m=>!m.revoked).length} members · ${childCount} children</div>
+    <div class="tablewrap"><table><thead><tr><th></th><th>Members active</th><th>Quizzes & exercises done</th><th>New requests</th><th>Approved</th></tr></thead><tbody>
+    ${Object.entries(S).map(([k,v])=>`<tr><td><b>${k}</b></td><td>${v.active}</td><td>${v.quizzes}</td><td>${v.asked}</td><td>${v.joined}</td></tr>`).join('')}</tbody></table></div></div>
    <div class="card stack"><div class="eyebrow">Waiting for approval · ${pending.length}</div>
     ${pending.length?`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Applied</th><th></th></tr></thead><tbody>${pending.map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.email)}</td><td>${esc(a.phone)}</td><td>${esc(fmtG(new Date(a.createdAt)))}</td><td class="row"><button class="btn sm" data-ok="${esc(a.id)}">Approve</button><button class="btn ghost sm" data-no="${esc(a.id)}">Decline</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No requests waiting.</p>'}</div>
    <div class="card stack"><div class="eyebrow">Members with access · ${members.filter(m=>!m.revoked).length}</div>
@@ -738,6 +777,14 @@ async function aPeople(){
   document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.clear).delete(); toast('They can apply again'); aPeople(); });
   document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{ if(b.dataset.armed){ await db.doc('members/'+b.dataset.revoke).update({revoked:true}); toast('Access removed'); aPeople(); } else { b.dataset.armed=1; b.textContent='Confirm remove'; } });
   document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async()=>{ await db.doc('members/'+b.dataset.restore).update({revoked:false}); toast('Access restored'); aPeople(); });
+}
+async function aFeedback(){
+  let items=[]; try{ items=(await db.collection('feedback').get()).docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.at||0)-(a.at||0)); }catch(e){}
+  $('#adm').innerHTML=`<div class="stack" style="gap:16px"><div class="card stack">
+   <div class="eyebrow">What should be improved?</div><p class="small muted">Only the two administrators see this. Claude reads new feedback and works on it, then marks it done.</p>
+   <form id="fbf" class="stack"><textarea id="fbt" required placeholder="e.g. Make the hymn numbers bigger on phones; add a Luganda Bible; fix hymn 14 verse 2…" style="font-family:var(--body);font-size:1rem"></textarea><button class="btn" style="align-self:flex-start">Send to Claude</button></form></div>
+   <div class="list">${items.map(f=>`<div class="li"><span class="pill ${f.status==='done'?'good':f.status==='working'?'warn':''}">${esc(f.status||'new')}</span><span style="flex:1">${esc(f.text)}<br><span class="small muted">${esc(f.from||'')} · ${f.at?esc(fmtG(new Date(f.at))):''}${f.reply?' · Claude: '+esc(f.reply):''}</span></span></div>`).join('')||'<p class="muted" style="padding:14px">No feedback yet.</p>'}</div></div>`;
+  $('#fbf').onsubmit=async e=>{e.preventDefault(); await db.collection('feedback').add({text:$('#fbt').value.trim(),from:me.email,at:Date.now(),status:'new'}); toast('Sent'); aFeedback(); };
 }
 function quizToText(qs){ return (qs||[]).map(q=>`Q: ${q.q}\n${q.options.map((o,j)=>(j===q.answer?'* ':'- ')+o).join('\n')}${q.ref?`\nref: ${q.ref}`:''}`).join('\n\n') }
 function textToQuiz(t){ return t.split(/\n\s*\n/).map(b=>{const L=b.split('\n').map(x=>x.trim()).filter(Boolean); const q=(L.find(x=>/^Q:/i.test(x))||'').replace(/^Q:\s*/i,''); const opts=L.filter(x=>/^[*-]\s/.test(x)); const ref=(L.find(x=>/^ref:/i.test(x))||'').replace(/^ref:\s*/i,'');
