@@ -1,0 +1,839 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#1d5a46">
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json">
+<title>House of Israel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+Phoenician&display=swap">
+<style>
+/* Layout: flag-green masthead with the emblem, a scrolling tab rail, then one working view at a time on a soft field. */
+:root{
+  --bg:#eef2ec; --surface:#ffffff; --surface2:#f6f8f4; --ink:#16241e; --muted:#56685f; --line:#d3ddd5;
+  --flag:#1d5a46; --flag-deep:#123d30; --gold:#b9862a; --gold-soft:#f3e6c6; --on-flag:#f4efe0;
+  --good:#2e7d4f; --warn:#a86a12; --bad:#b23b3b;
+  --display:"Frank Ruhl Libre", Georgia, "Times New Roman", serif;
+  --body:"Source Sans 3", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --paleo:"Noto Sans Phoenician", "Segoe UI Historic", serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1a15; --surface:#13271f; --surface2:#183128; --ink:#e7eee9; --muted:#9fb3a9; --line:#26443a;
+  --flag:#1d5a46; --flag-deep:#0f3327; --gold:#e2b75c; --gold-soft:#3a3218; --on-flag:#f4efe0;
+  --good:#5cc08a; --warn:#e2a14a; --bad:#ef7a7a; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0c1a15; --surface:#13271f; --surface2:#183128; --ink:#e7eee9; --muted:#9fb3a9; --line:#26443a;
+  --flag:#1d5a46; --flag-deep:#0f3327; --gold:#e2b75c; --gold-soft:#3a3218; --on-flag:#f4efe0;
+  --good:#5cc08a; --warn:#e2a14a; --bad:#ef7a7a; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--flag-deep)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.15;margin:0}
+h2{font-size:1.7rem} h3{font-size:1.2rem}
+a{color:var(--flag)} :root[data-theme="dark"] a{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) a{color:var(--gold)}}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mast{background:var(--flag);color:var(--on-flag);position:relative;overflow:hidden}
+.mast .wrap{display:flex;align-items:center;gap:14px;padding-block:14px}
+.mast h1{font-size:1.55rem;letter-spacing:.01em}
+.mast .sub{font-size:.85rem;opacity:.85}
+.mast .who{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:.85rem}
+.logo{width:56px;height:56px;flex:none}
+.rail{background:var(--flag-deep);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.rail nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-block:4px}
+.rail nav::-webkit-scrollbar{display:none}
+.rail a{color:var(--on-flag)!important;text-decoration:none;padding:9px 13px;border-radius:8px;white-space:nowrap;font-weight:600;font-size:.93rem;opacity:.82}
+.rail a[aria-current="page"]{background:var(--gold);color:#1b1505!important;opacity:1}
+main{padding-block:22px 64px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;min-width:0}
+.eyebrow{text-transform:uppercase;letter-spacing:.09em;font-size:.74rem;font-weight:700;color:var(--muted)}
+.muted{color:var(--muted)} .small{font-size:.88rem}
+.big{font-family:var(--display);font-size:2.2rem;font-weight:700;line-height:1.05}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--flag);background:var(--flag);color:var(--on-flag);padding:9px 16px;border-radius:9px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#1b1505}
+.btn.sm{padding:5px 11px;font-size:.88rem}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stack{display:flex;flex-direction:column;gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.9rem}
+input[type=text],input[type=email],input[type=tel],input[type=password],input[type=date],input[type=url],input[type=number],select,textarea{border:1px solid var(--line);background:var(--surface2);border-radius:9px;padding:9px 11px;font-weight:400;width:100%}
+textarea{min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88rem}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--surface2);border:1px solid var(--line)}
+.pill.gold{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
+.pill.good{color:var(--good);border-color:var(--good)} .pill.warn{color:var(--warn);border-color:var(--warn)} .pill.bad{color:var(--bad);border-color:var(--bad)}
+.paleo{font-family:var(--paleo);unicode-bidi:isolate;direction:rtl;font-size:1.05em;color:var(--flag);white-space:nowrap}
+:root[data-theme="dark"] .paleo{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .paleo{color:var(--gold)}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;z-index:50;max-width:90vw}
+/* moon */
+.moonhero{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;background:linear-gradient(160deg,var(--flag) 0%,var(--flag-deep) 100%);color:var(--on-flag);border-radius:18px;padding:22px;border:0}
+.moonhero .eyebrow{color:var(--on-flag);opacity:.75}
+.moonhero canvas{width:150px;height:150px}
+@media (max-width:560px){.moonhero{grid-template-columns:1fr;justify-items:center;text-align:center}}
+.dualdate{font-family:var(--display);font-size:1.6rem;font-weight:700;line-height:1.2}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal .hd{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;font-weight:700;padding-bottom:2px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:78px;padding:6px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.day .m{font-family:var(--display);font-size:1.25rem;font-weight:700;line-height:1}
+.day .g{font-size:.74rem;color:var(--muted)}
+.day .ev{font-size:.68rem;font-weight:700;color:var(--gold);line-height:1.15;overflow-wrap:anywhere}
+.day.sab{background:var(--surface2)}
+.day.today{border:2px solid var(--gold);box-shadow:0 0 0 3px var(--gold-soft)}
+.day canvas{width:18px;height:18px;margin-top:auto}
+.day.blank{background:transparent;border:0}
+@media (max-width:560px){.day{min-height:62px;padding:4px}.day .m{font-size:1rem}.day .ev{display:none}.day.hasev::after{content:"•";color:var(--gold);font-weight:900}}
+/* scripture */
+.reader{font-family:var(--display);font-size:1.13rem;line-height:1.75;max-width:68ch}
+.reader sup{font-family:var(--body);font-size:.7rem;color:var(--gold);font-weight:700;margin-right:3px;vertical-align:super}
+.reader .v{scroll-margin-top:90px}
+.reader .v.hl{background:var(--gold-soft);border-radius:4px}
+.hymn pre{white-space:pre-wrap;font-family:var(--display);font-size:1.12rem;line-height:1.6;margin:0}
+.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.list button.li,.list a.li{display:flex;gap:12px;align-items:baseline;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;color:inherit;text-decoration:none}
+.list .li:last-child{border-bottom:0}
+.list .li:hover{background:var(--surface2)}
+.num{font-family:var(--display);font-weight:700;color:var(--gold);min-width:2.4em;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tablewrap{overflow-x:auto}
+.q{border-top:1px solid var(--line);padding-top:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface2)}
+.opt.right{border-color:var(--good);box-shadow:inset 4px 0 0 var(--good)}
+.opt.wrong{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}
+.ws{display:grid;gap:3px;user-select:none;touch-action:manipulation;max-width:520px}
+.ws button{aspect-ratio:1;border:1px solid var(--line);background:var(--surface);border-radius:6px;font-weight:700;font-size:clamp(.7rem,2.6vw,1rem);padding:0;cursor:pointer;color:var(--ink)}
+.ws button.sel{background:var(--gold-soft);border-color:var(--gold)}
+.ws button.found{background:var(--flag);color:var(--on-flag);border-color:var(--flag)}
+.words{display:flex;flex-wrap:wrap;gap:6px}
+.words span.done{text-decoration:line-through;opacity:.55}
+.gate{max-width:460px;margin:40px auto}
+.bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--gold)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}
+</style>
+</head><body>
+
+<header class="mast">
+  <div class="wrap">
+    <svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><use href="#emblem"/></svg>
+    <div>
+      <h1>House of Israel</h1>
+      <div class="sub" id="mastSub">Beit Yisra’ĕl · members’ home</div>
+    </div>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+<div class="rail" id="rail" hidden>
+  <div class="wrap"><nav id="nav" aria-label="Sections"></nav></div>
+</div>
+<main class="wrap" id="app"><div class="gate card"><p class="muted">Opening the House of Israel…</p></div></main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="emblem">
+      <rect width="120" height="120" rx="14" fill="#1d5a46"/>
+      <g fill="#e2b75c">
+        <!-- 12 stars on an arc -->
+        <g id="stars"></g>
+      </g>
+      <!-- olive branches -->
+      <g fill="none" stroke="#f4efe0" stroke-width="2.4" stroke-linecap="round">
+        <path d="M30 40 C22 62 30 86 54 98"/><path d="M90 40 C98 62 90 86 66 98"/>
+        <path d="M52 99 L70 92 M68 99 L50 92"/>
+      </g>
+      <g fill="#f4efe0">
+        <ellipse cx="26" cy="50" rx="2.6" ry="6" transform="rotate(-20 26 50)"/><ellipse cx="34" cy="48" rx="2.6" ry="6" transform="rotate(35 34 48)"/>
+        <ellipse cx="24" cy="62" rx="2.6" ry="6" transform="rotate(-40 24 62)"/><ellipse cx="32" cy="62" rx="2.6" ry="6" transform="rotate(30 32 62)"/>
+        <ellipse cx="26" cy="74" rx="2.6" ry="6" transform="rotate(-60 26 74)"/><ellipse cx="35" cy="75" rx="2.6" ry="6" transform="rotate(20 35 75)"/>
+        <ellipse cx="33" cy="86" rx="2.6" ry="6" transform="rotate(-75 33 86)"/><ellipse cx="42" cy="85" rx="2.6" ry="6" transform="rotate(5 42 85)"/>
+        <ellipse cx="94" cy="50" rx="2.6" ry="6" transform="rotate(20 94 50)"/><ellipse cx="86" cy="48" rx="2.6" ry="6" transform="rotate(-35 86 48)"/>
+        <ellipse cx="96" cy="62" rx="2.6" ry="6" transform="rotate(40 96 62)"/><ellipse cx="88" cy="62" rx="2.6" ry="6" transform="rotate(-30 88 62)"/>
+        <ellipse cx="94" cy="74" rx="2.6" ry="6" transform="rotate(60 94 74)"/><ellipse cx="85" cy="75" rx="2.6" ry="6" transform="rotate(-20 85 75)"/>
+        <ellipse cx="87" cy="86" rx="2.6" ry="6" transform="rotate(75 87 86)"/><ellipse cx="78" cy="85" rx="2.6" ry="6" transform="rotate(-5 78 85)"/>
+      </g>
+      <!-- menorah -->
+      <g fill="none" stroke="#e2b75c" stroke-width="3" stroke-linecap="round">
+        <path d="M60 44 V86"/>
+        <path d="M42 44 V52 Q42 64 60 64 Q78 64 78 52 V44"/>
+        <path d="M48 44 V52 Q48 59 60 59 Q72 59 72 52 V44"/>
+        <path d="M54 44 V52 Q54 55 60 55 Q66 55 66 52 V44"/>
+        <path d="M40 43 H80"/>
+      </g>
+      <path d="M52 88 H68 L64 82 H56 Z" fill="#e2b75c"/>
+    </g>
+  </defs>
+</svg>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+const FB_CONFIG={apiKey:"AIzaSyDW3yCWrgKmbAyHdEwnTZloK0yDeeHD640",authDomain:"house-of-israel.firebaseapp.com",projectId:"house-of-israel",storageBucket:"house-of-israel.firebasestorage.app",messagingSenderId:"385499051298",appId:"1:385499051298:web:90fce55d337499fcefa17b"};
+const ADMINS=["rebekahzadokmugisha@gmail.com"];
+// ---------- emblem stars ----------
+(function(){const g=document.getElementById('stars');let s='';for(let i=0;i<12;i++){const a=Math.PI*(1.08+0.84*i/11);const x=60+42*Math.cos(a),y=58+42*Math.sin(a);s+=`<path transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(.9)" d="M0-4 1.1-1.3 4-1.2 1.8.6 2.5 3.4 0 1.8-2.5 3.4-1.8.6-4-1.2-1.1-1.3Z"/>`}g.innerHTML=s})();
+
+// ---------- helpers ----------
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=864e5;
+const pad=n=>String(n).padStart(2,'0');
+const isoLocal=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmtG=(d,o={weekday:'short',day:'numeric',month:'short',year:'numeric'})=>d.toLocaleDateString('en-GB',o);
+const ordinal=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const FIRST_PASSWORD='Pesach123!';
+
+// ---------- sunset for Kampala (NOAA approximation) ----------
+const LAT=0.3476, LON=32.5825, TZ=3;
+function sunsetLocal(date){ // returns Date of sunset in local device time (computed for Kampala, EAT)
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const doy=Math.floor((d-Date.UTC(d.getUTCFullYear(),0,0))/DAY);
+  const g=2*Math.PI/365*(doy-1+.5);
+  const eq=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  const decl=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  const lat=LAT*Math.PI/180;
+  const ha=Math.acos(Math.cos(90.833*Math.PI/180)/(Math.cos(lat)*Math.cos(decl))-Math.tan(lat)*Math.tan(decl))*180/Math.PI;
+  const minsUTC=720-4*(LON-ha)-eq; // sunset
+  return new Date(d.getTime()+minsUTC*6e4);
+}
+const fmtTime=d=>d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Kampala'});
+
+// ---------- the moon calendar ----------
+// Anchor given by the House: full-moon peak Tuesday 27 Oct 2026 evening into Wednesday = the 14th into the 15th of the 8th month.
+// So daytime Wed 28 Oct 2026 is day 15; day 1 of the 8th month is Wed 14 Oct 2026 (it began at sunset Tue 13 Oct).
+const SYN=29.530588853;
+const DEFAULT_ANCHOR={date:'2026-10-14',month:8,full:'2026-10-27T18:55:00+03:00'};
+let ANCHORS=[DEFAULT_ANCHOR]; // admin can add corrections: {date:'YYYY-MM-DD', month:N}
+let LEAP_AFTER12=[]; // ISO dates of day 1 of a 13th month (admin)
+function moonDayFor(dateMidnight){ // civil date -> {month, day, start, len}
+  const anchors=[...ANCHORS].sort((a,b)=>a.date<b.date?-1:1);
+  let a=anchors[0]; for(const x of anchors){ if(parseISO(x.date)<=dateMidnight) a=x; }
+  const a0=parseISO(a.date);
+  const diff=Math.round((dateMidnight-a0)/DAY);
+  let k=Math.floor((diff+0.0001)/SYN); // approximate month index
+  const startOf=k=>new Date(a0.getTime()+Math.floor(k*SYN+1e-9)*DAY);
+  while(startOf(k+1)<=dateMidnight) k++;
+  while(startOf(k)>dateMidnight) k--;
+  const start=startOf(k), next=startOf(k+1);
+  // month numbering: count forward, wrap after 12 unless a 13th month is declared
+  let m=a.month;
+  for(let i=0;i<Math.abs(k);i++){
+    if(k>0){ const s=isoLocal(startOf(i+1)); m = (m===12 && LEAP_AFTER12.includes(s))?13:(m>=12?1:m+1); }
+    else { m = m<=1?12:m-1; }
+  }
+  return {month:m, day:Math.round((dateMidnight-start)/DAY)+1, start, len:Math.round((next-start)/DAY), next};
+}
+function hebrewNow(now=new Date()){
+  // the day begins at sunset
+  const mid=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const ss=sunsetLocal(mid);
+  const afterSunset=now>=ss;
+  const civil=afterSunset?new Date(mid.getTime()+DAY):mid;
+  return {...moonDayFor(civil), afterSunset, sunset:ss, civil};
+}
+function moonPhase(t=new Date()){ // 0=new, .5=full, from the House's anchor full moon
+  const full=new Date(ANCHORS.find(a=>a.full)?.full||DEFAULT_ANCHOR.full);
+  let p=((t-full)/DAY/SYN+0.5)%1; if(p<0)p+=1; return p;
+}
+function drawMoon(cv,phase,opts={}){
+  const dpr=window.devicePixelRatio||1, W=cv.clientWidth||cv.width, H=cv.clientHeight||cv.height;
+  cv.width=W*dpr; cv.height=H*dpr; const c=cv.getContext('2d'); c.scale(dpr,dpr);
+  const r=Math.min(W,H)/2-(opts.small?0.5:4), cx=W/2, cy=H/2;
+  const lit=opts.lit||'#f6ecc9', dark=opts.dark||'rgba(0,0,0,.35)';
+  c.clearRect(0,0,W,H);
+  if(!opts.small){const gr=c.createRadialGradient(cx,cy,r*.8,cx,cy,r*1.25);gr.addColorStop(0,'rgba(246,236,201,.25)');gr.addColorStop(1,'rgba(246,236,201,0)');c.fillStyle=gr;c.beginPath();c.arc(cx,cy,r*1.25,0,7);c.fill();}
+  c.fillStyle=dark; c.beginPath(); c.arc(cx,cy,r,0,Math.PI*2); c.fill();
+  const waxing=phase<0.5; const f=Math.cos(phase*2*Math.PI); // 1 new -> -1 full
+  c.fillStyle=lit; c.beginPath();
+  // lit limb: right side when waxing (southern/equatorial view simplified)
+  if(waxing){ c.arc(cx,cy,r,-Math.PI/2,Math.PI/2,false); }
+  else { c.arc(cx,cy,r,Math.PI/2,-Math.PI/2,false); }
+  const rx=Math.abs(f)*r;
+  // terminator ellipse
+  if(waxing){ c.ellipse(cx,cy,rx,r,0,Math.PI/2,-Math.PI/2, f>0); }
+  else { c.ellipse(cx,cy,rx,r,0,-Math.PI/2,Math.PI/2, f>0); }
+  c.fill();
+  if(!opts.small){ c.strokeStyle='rgba(246,236,201,.35)'; c.lineWidth=1; c.beginPath(); c.arc(cx,cy,r,0,7); c.stroke(); }
+}
+function phaseWords(p){
+  if(p<0.03||p>0.97) return 'New moon';
+  if(p<0.22) return 'Waxing crescent'; if(p<0.28) return 'First quarter'; if(p<0.47) return 'Waxing gibbous';
+  if(p<0.53) return 'Full moon'; if(p<0.72) return 'Waning gibbous'; if(p<0.78) return 'Last quarter'; return 'Waning crescent';
+}
+// appointed times placed on the moon calendar (month/day)
+const FEASTS=[
+  {m:1,d:14,n:'Passover (Pesach)'},{m:1,d:15,n:'Unleavened Bread begins',span:7},
+  {m:3,d:6,n:'Shavuot (Feast of Weeks)'},
+  {m:7,d:1,n:'Yom Teruah (Trumpets)'},{m:7,d:10,n:'Yom Kippur (Atonement)'},
+  {m:7,d:15,n:'Sukkot (Tabernacles) begins',span:7},{m:7,d:22,n:'Shemini Atzeret (8th day)'},
+  {m:9,d:25,n:'Ḥanukkah begins',span:8},{m:12,d:14,n:'Purim'}];
+function feastsOn(md){ const out=[];
+  for(const f of FEASTS){ if(f.m===md.month && md.day===f.d) out.push(f.n);
+    else if(f.span && f.m===md.month && md.day>f.d && md.day<f.d+f.span) out.push((f.n.replace(/ begins$/,''))+' · day '+(md.day-f.d+1)); }
+  if(md.day===1) out.unshift('New month');
+  return out; }
+
+// ---------- static data ----------
+let PORTIONS=[], HYMNS=[], SCR=null;
+const BOOK_ALIASES={'I Samuel':'1 Samuel','II Samuel':'2 Samuel','I Kings':'1 Kings','II Kings':'2 Kings','I Chronicles':'1 Chronicles','II Chronicles':'2 Chronicles'};
+const PARASHA_MEANING={"Bereshit":"In the beginning","Noach":"Rest / Noah","Lech-Lecha":"Go forth","Vayera":"And He appeared","Chayei Sara":"The life of Sarah","Toldot":"Generations","Vayetzei":"And he went out","Vayishlach":"And he sent","Vayeshev":"And he settled","Miketz":"At the end","Vayigash":"And he drew near","Vayechi":"And he lived","Shemot":"Names","Vaera":"And I appeared","Bo":"Come","Beshalach":"When he let go","Yitro":"Jethro","Mishpatim":"Judgments","Terumah":"Offering","Tetzaveh":"You shall command","Ki Tisa":"When you take","Vayakhel":"And he assembled","Pekudei":"Accounts","Vayakhel-Pekudei":"And he assembled · Accounts","Vayikra":"And He called","Tzav":"Command","Shmini":"Eighth","Tazria":"She conceives","Metzora":"Leper","Tazria-Metzora":"She conceives · Leper","Achrei Mot":"After the death","Kedoshim":"Holy ones","Achrei Mot-Kedoshim":"After the death · Holy ones","Emor":"Speak","Behar":"On the mount","Bechukotai":"In My statutes","Behar-Bechukotai":"On the mount · In My statutes","Bamidbar":"In the wilderness","Nasso":"Lift up","Beha'alotcha":"When you set up","Sh'lach":"Send","Korach":"Korah","Chukat":"Statute","Balak":"Balak","Chukat-Balak":"Statute · Balak","Pinchas":"Phinehas","Matot":"Tribes","Masei":"Journeys","Matot-Masei":"Tribes · Journeys","Devarim":"Words","Vaetchanan":"And I pleaded","Eikev":"Because","Re'eh":"See","Shoftim":"Judges","Ki Teitzei":"When you go out","Ki Tavo":"When you come in","Nitzavim":"Standing","Vayeilech":"And he went","Nitzavim-Vayeilech":"Standing · And he went","Ha'azinu":"Listen","Vezot Haberakhah":"And this is the blessing"};
+async function loadJSON(p){const r=await fetch(p);if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
+async function ensureScriptures(){ if(!SCR){ const s=await db.doc('texts/scr_index').get(); SCR=s.exists?s.data().books.map(b=>({...b,chapters:null})):[]; } return SCR }
+async function getBook(i){ await ensureScriptures(); if(!SCR[i]) return null; if(!SCR[i].chapters){ const s=await db.doc('texts/scr_'+String(i).padStart(2,'0')).get(); SCR[i].chapters=s.exists?JSON.parse(s.data().chapters):[]; } return SCR[i] }
+function nameText(t){ // YAH Scriptures restored names, shown in the Paleo-Hebrew letters as printed
+  return esc(t).replace(/(“|‘)?\s*⟨H⟩\s*(?=[,.;:!?’”])/g,(m,q)=>(q||'')+'⟨H⟩').replace(/(“|‘)\s+⟨/g,'$1⟨')
+    .replace(/⟨H⟩/g,'<span class="paleo" title="YHWH">𐤉𐤄𐤅𐤄</span>')
+    .replace(/⟨Y⟩/g,'<span class="paleo" title="Yahushua">𐤉𐤄𐤅𐤔𐤏</span>');
+}
+function portionFor(dateMidnight){ // the Shabbat on or after the date
+  const iso=isoLocal(dateMidnight);
+  return PORTIONS.find(w=>w.date>=iso)||null;
+}
+function portionTitle(w){ if(!w) return '—'; return w.parasha||w.holiday||'Festival Shabbat' }
+function parseRefs(s){ // "Genesis 23:1-25:18; I Kings 1:1-31"
+  const out=[]; if(!s) return out;
+  for(let part of s.split(/;\s*/)){
+    const m=part.match(/^(.+?)\s+(\d+):(\d+)(?:-(?:(\d+):)?(\d+))?$/); if(!m) continue;
+    let book=BOOK_ALIASES[m[1]]||m[1];
+    const c1=+m[2],v1=+m[3]; const c2=m[4]?+m[4]:c1; const v2=m[5]?+m[5]:v1;
+    out.push({book,c1,v1,c2,v2,label:part.replace(/^(I{1,2}) /,(x,r)=>r.length+' ')});
+  }
+  return out;
+}
+function bookIndex(name){ return SCR.findIndex(b=>b.name===name) }
+async function passageHTML(ref){
+  const bi=bookIndex(ref.book); if(bi<0) return `<p class="muted">${esc(ref.label)} not found.</p>`;
+  const b=await getBook(bi); let h='';
+  for(let c=ref.c1;c<=ref.c2;c++){
+    const ch=b.chapters[c-1]; if(!ch) continue;
+    const vs=(c===ref.c1?ref.v1:1), ve=(c===ref.c2?ref.v2:ch.length);
+    h+=`<h3 style="margin:18px 0 6px">${esc(b.name)} ${c}</h3><p class="reader">`;
+    for(let v=vs;v<=Math.min(ve,ch.length);v++) h+=`<span class="v"><sup>${v}</sup>${nameText(ch[v-1])} </span>`;
+    h+='</p>';
+  }
+  return h;
+}
+
+// ---------- capabilities & state ----------
+let db=null, auth=null, me=null, isOwner=false, sample=false;
+let CONTENT={settings:{},schedule:{weeks:{}},links:{items:[]},hymnEdits:{},calendar:{}};
+let ACT=null;
+const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['me','My progress']];
+let started=false;
+async function boot(){
+  try{ PORTIONS=await loadJSON('portions.json'); }catch(e){ console.warn(e) }
+  firebase.initializeApp(FB_CONFIG); db=firebase.firestore(); auth=firebase.auth();
+  auth.onAuthStateChanged(async u=>{
+    if(!u){ started=false; $('#rail').hidden=true; $('#who').innerHTML=''; return renderAuth(); }
+    me={id:u.uid,email:(u.email||'').toLowerCase(),name:''}; isOwner=ADMINS.includes(me.email);
+    if(!isOwner){ let m=null; try{ m=await db.doc('members/'+u.uid).get(); }catch(e){}
+      if(!m||!m.exists||m.data().revoked){ await auth.signOut(); return renderAuth('signin','Your access has not been approved yet. You will be able to sign in once the administrator approves your request.'); }
+      me.name=m.data().name||''; me.mustChange=!!m.data().mustChange; }
+    else me.name='Administrator';
+    await loadContent();
+    if(!started){ started=true; enterApp(me.mustChange); }
+  });
+}
+function renderAuth(tab='signin',msg=''){
+  $('#app').innerHTML=`<div class="gate card stack">
+   <div class="row"><button class="btn sm ${tab==='signin'?'':'ghost'}" id="tSign">Sign in</button><button class="btn sm ${tab==='apply'?'':'ghost'}" id="tApply">Apply for access</button></div>
+   ${msg?`<p class="small" style="color:var(--warn)">${esc(msg)}</p>`:''}
+   ${tab==='signin'?`<h2>Welcome to the House</h2>
+   <p class="muted small">Sign in with the email you applied with. The first password for everyone is <b>${FIRST_PASSWORD}</b>; change it after you sign in.</p>
+   <form id="lf" class="stack"><label class="f">Email<input type="email" id="lgEmail" required autocomplete="username"></label>
+   <label class="f">Password<input type="password" id="lgPw" required autocomplete="current-password"></label>
+   <p id="lgErr" class="small" style="color:var(--bad)" hidden></p>
+   <button class="btn" type="submit">Enter</button></form>
+   <div class="row small"><button class="btn ghost sm" id="forgot">Forgot password</button><button class="btn ghost sm" id="adminSetup">Administrator first-time setup</button></div>`:
+   `<h2>Apply to enter</h2><p class="muted small">This is the private home of the House of Israel. Send your details and the administrator will approve you. Then sign in with your email and the password <b>${FIRST_PASSWORD}</b>.</p>
+   <form id="af" class="stack"><label class="f">Full name<input type="text" id="apName" required autocomplete="name"></label>
+   <label class="f">Email<input type="email" id="apEmail" required autocomplete="email"></label>
+   <label class="f">Phone number<input type="tel" id="apPhone" required autocomplete="tel" placeholder="+256 …"></label>
+   <button class="btn" type="submit">Send request</button></form>`}
+  </div>`;
+  $('#tSign').onclick=()=>renderAuth('signin'); $('#tApply').onclick=()=>renderAuth('apply');
+  $('#lf')?.addEventListener('submit',async e=>{e.preventDefault(); const er=$('#lgErr'); er.hidden=true;
+    try{ await auth.signInWithEmailAndPassword($('#lgEmail').value.trim(),$('#lgPw').value); }
+    catch(err){ er.hidden=false; er.textContent=/user-not-found|invalid-credential|wrong-password|invalid-login/.test(err.code)?'That email and password do not match an approved member. If you were just approved, use '+FIRST_PASSWORD+'.':'Could not sign in: '+(err.message||err.code); } });
+  $('#forgot')?.addEventListener('click',async()=>{ const em=$('#lgEmail').value.trim(); if(!em) return toast('Type your email first'); try{ await auth.sendPasswordResetEmail(em); toast('A reset link was sent to '+em);}catch(e){ toast('Could not send reset: '+(e.code||'')) } });
+  $('#adminSetup')?.addEventListener('click',async()=>{ const em=$('#lgEmail').value.trim().toLowerCase(), pw=$('#lgPw').value;
+    if(!ADMINS.includes(em)) return toast('Only the administrator email can use this.'); if(pw.length<8) return toast('Choose a password of at least 8 characters, then press this again.');
+    try{ await auth.createUserWithEmailAndPassword(em,pw); toast('Administrator login created'); }catch(e){ toast(e.code==='auth/email-already-in-use'?'The administrator login already exists. Use Sign in.':'Could not create: '+e.code) } });
+  $('#af')?.addEventListener('submit',async e=>{e.preventDefault();
+    const email=$('#apEmail').value.trim().toLowerCase();
+    const data={name:$('#apName').value.trim(),email,phone:$('#apPhone').value.trim(),status:'pending',createdAt:Date.now()};
+    try{ await db.doc('applications/'+email).set(data); $('#app').innerHTML=`<div class="gate card stack"><h2>Request sent</h2><p>Thank you, ${esc(data.name)}. You will receive an email when the administrator approves you. Then sign in here with <b>${esc(email)}</b> and the password <b>${FIRST_PASSWORD}</b>.</p><button class="btn ghost" id="back">Back to sign in</button></div>`; $('#back').onclick=()=>renderAuth('signin'); }
+    catch(err){ toast(err.code==='permission-denied'?'A request for this email already exists. Please wait for approval.':'Could not send: '+(err.message||err.code)); } });
+}
+async function loadContent(){
+  const ids=['settings','schedule','links','hymnEdits','calendar'];
+  await Promise.all(ids.map(async id=>{try{const s=await db.doc('content/'+id).get(); if(s.exists) CONTENT[id]={...CONTENT[id],...s.data()}}catch(e){}}));
+  if(CONTENT.calendar.anchors?.length) ANCHORS=[DEFAULT_ANCHOR,...CONTENT.calendar.anchors];
+  if(CONTENT.calendar.leap?.length) LEAP_AFTER12=CONTENT.calendar.leap;
+}
+
+async function enterApp(firstLogin){
+  $('#rail').hidden=false;
+  const navItems=[...routes]; if(isOwner) navItems.push(['admin','Admin']);
+  $('#nav').innerHTML=navItems.map(([id,l])=>`<a href="#${id}" data-r="${id}">${esc(l)}</a>`).join('');
+  $('#who').innerHTML=`<span class="small">${esc(me.name||'Member')}</span>${isOwner?'<span class="pill gold">Admin</span>':''}`;
+  await trackVisit();
+  window.addEventListener('hashchange',route);
+  if(firstLogin){ toast('Welcome! Please set your own password.'); location.hash='#me'; }
+  route();
+  setInterval(()=>{ const c=$('#heroMoon'); if(c){ drawMoon(c,moonPhase()); } },60000);
+}
+async function trackVisit(){
+  try{
+    const ref=db.doc('activity/'+me.id); const s=await ref.get(); const a=s.exists?{...s.data()}:{visits:0,days:{},read:{},quiz:{}};
+    const today=isoLocal(new Date());
+    const fresh=!sessionStorage.getItem('hoi_v');
+    try{sessionStorage.setItem('hoi_v','1')}catch(e){}
+    if(fresh){ a.visits=(a.visits||0)+1; a.days={...(a.days||{}),[today]:true}; a.lastVisit=Date.now(); a.name=me.name||a.name||''; a.email=me.email; await ref.set(a); }
+    ACT=a;
+  }catch(e){ ACT={visits:0,days:{},read:{},quiz:{}} }
+}
+async function saveAct(patch){ ACT={...ACT,...patch}; try{ await db.doc('activity/'+me.id).set(ACT);}catch(e){ toast('Could not save progress') } }
+
+function route(){
+  const r=(location.hash||'#home').slice(1)||'home';
+  document.querySelectorAll('#nav a').forEach(a=>{ if(a.dataset.r===r) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  const v={home:vHome,calendar:vCalendar,torah:vTorah,scriptures:vScriptures,hymns:vHymns,quiz:vQuiz,kids:vKids,library:vLibrary,teaching:vTeaching,me:vMe,admin:vAdmin}[r]||vHome;
+  if(r==='admin'&&!isOwner) return vHome();
+  window.scrollTo(0,0); v();
+}
+
+// ---------- HOME ----------
+function heroMoonHTML(){
+  const h=hebrewNow(), p=moonPhase(); const now=new Date();
+  const left=h.len-h.day;
+  const nextStart=h.next; const eveBefore=new Date(nextStart.getTime()-DAY);
+  return `<section class="card moonhero" aria-label="Today">
+    <canvas id="heroMoon" width="150" height="150" role="img" aria-label="${esc(phaseWords(p))}"></canvas>
+    <div class="stack" style="gap:6px">
+      <div class="eyebrow">Today</div>
+      <div class="dualdate">Day ${h.day} of the ${ordinal(h.month)} month</div>
+      <div>${esc(fmtG(now,{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</div>
+      <div class="small" style="opacity:.85">${esc(phaseWords(p))} · ${h.afterSunset?'the new day began at sunset':'the day turns at sunset, about '+fmtTime(h.sunset)}</div>
+      <div class="small" style="opacity:.85">The ${ordinal(h.month)} month has ${left===0?'its last day today':left+' more day'+(left>1?'s':'')}. The ${ordinal(moonDayFor(nextStart).month)} month begins at sunset on ${esc(fmtG(eveBefore,{weekday:'long',day:'numeric',month:'short'}))}.</div>
+    </div></section>`;
+}
+function vHome(){
+  const today=new Date(); const mid=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const w=portionFor(mid); const sch=w?CONTENT.schedule.weeks?.[w.date]:null;
+  $('#app').innerHTML=`<div class="grid">${heroMoonHTML()}
+   <div class="grid g2">
+    <a class="card" href="#torah" style="text-decoration:none;color:inherit">
+      <div class="eyebrow">This week’s Torah portion · Shabbat ${w?esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'})):''}</div>
+      <h2 style="margin-top:6px">${esc(portionTitle(w))}</h2>
+      <div class="muted">${esc(PARASHA_MEANING[w?.parasha]||w?.special||'')}</div>
+      <p class="small" style="margin-bottom:0">Torah: ${esc(w?.torah||'')}<br>Haftarah: ${esc(w?.haftarah||'')}</p>
+    </a>
+    <div class="card stack">
+      <div class="eyebrow">Shabbat school this week</div>
+      ${sch&&!sch.onHold?(['t1','t2'].map(k=>sch[k]?.name?`<div><b>${esc(sch[k].name)}</b></div>`:'').join('')||'<p class="muted">Teachers not yet set.</p>'):sch?.onHold?`<p><span class="pill warn">On hold</span> ${esc(sch.note||'')}</p>`:'<p class="muted">Teachers not yet set for this week.</p>'}
+      <a href="#teaching" class="small">Full teaching schedule</a>
+    </div>
+    <a class="card" href="#quiz" style="text-decoration:none;color:inherit"><div class="eyebrow">Weekly quiz</div><h3 style="margin-top:6px">Test yourself on ${esc(portionTitle(w))}</h3><p class="muted small">Detail questions from this week’s portion in the YAH Scriptures.</p></a>
+    <a class="card" href="#hymns" style="text-decoration:none;color:inherit"><div class="eyebrow">Hymn book</div><h3 style="margin-top:6px">House of Israel hymns</h3><p class="muted small">English, Luganda and Hebrew, in hymn-book order.</p></a>
+   </div></div>`;
+  drawMoon($('#heroMoon'),moonPhase());
+}
+
+// ---------- CALENDAR ----------
+let calOffset=0;
+function vCalendar(){
+  const h=hebrewNow();
+  // walk months from current
+  let md=moonDayFor(h.civil); let start=md.start;
+  for(let i=0;i<Math.abs(calOffset);i++){ if(calOffset>0){ start=moonDayFor(md.next).start; md=moonDayFor(start);} else { md=moonDayFor(new Date(md.start.getTime()-DAY)); start=md.start; } }
+  const cur=moonDayFor(start);
+  const cells=[]; const lead=start.getDay();
+  for(let i=0;i<lead;i++) cells.push('<div class="day blank"></div>');
+  const todayCivil=isoLocal(h.civil);
+  for(let d=0; d<cur.len; d++){
+    const g=new Date(start.getTime()+d*DAY); const m=moonDayFor(g); const ev=feastsOn(m);
+    const sab=g.getDay()===6; const w=sab?PORTIONS.find(x=>x.date===isoLocal(g)):null;
+    if(w) ev.push(portionTitle(w));
+    cells.push(`<div class="day${sab?' sab':''}${isoLocal(g)===todayCivil?' today':''}${ev.length?' hasev':''}" title="${esc(ev.join(' · '))}">
+      <span class="m">${m.day}</span><span class="g">${esc(fmtG(g,{day:'numeric',month:'short'}))}</span>
+      ${ev.map(e=>`<span class="ev">${esc(e)}</span>`).join('')}
+      <canvas data-ph="${moonPhase(new Date(g.getTime()+12*36e5))}" width="18" height="18"></canvas></div>`);
+  }
+  const g0=start, g1=new Date(start.getTime()+(cur.len-1)*DAY);
+  const feastList=[]; for(let d=0;d<cur.len;d++){const g=new Date(start.getTime()+d*DAY); const m=moonDayFor(g); for(const e of feastsOn(m)) if(e!=='New month') feastList.push(`<li><b>Day ${m.day}</b> (${esc(fmtG(g))}) · ${esc(e)}</li>`)}
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">${calOffset===0?heroMoonHTML():''}
+   <div class="row" style="justify-content:space-between">
+     <div><div class="eyebrow">Moon calendar</div><h2>The ${ordinal(cur.month)} month</h2>
+     <div class="muted small">${esc(fmtG(g0,{day:'numeric',month:'long'}))} – ${esc(fmtG(g1,{day:'numeric',month:'long',year:'numeric'}))} · ${cur.len} days · each day begins at the sunset before</div></div>
+     <div class="row"><button class="btn ghost sm" id="calPrev">← Previous month</button>${calOffset?'<button class="btn ghost sm" id="calNow">This month</button>':''}<button class="btn ghost sm" id="calNext">Next month →</button></div>
+   </div>
+   <div class="cal">${['Sun','Mon','Tue','Wed','Thu','Fri','Shabbat'].map(d=>`<div class="hd">${d}</div>`).join('')}${cells.join('')}</div>
+   ${feastList.length?`<div class="card"><div class="eyebrow">Appointed times this month</div><ul>${feastList.join('')}</ul></div>`:''}
+   <p class="muted small">Counting starts from the full moon of Tuesday evening 27 October 2026 into Wednesday, the 14th into the 15th of the 8th month. Large numbers are moon days, small dates are Gregorian.</p>
+  </div>`;
+  if(calOffset===0) drawMoon($('#heroMoon'),moonPhase());
+  document.querySelectorAll('.day canvas').forEach(c=>drawMoon(c,+c.dataset.ph,{small:true,lit:getComputedStyle(document.body).getPropertyValue('--gold').trim()||'#c99a3b',dark:'rgba(120,130,125,.35)'}));
+  $('#calPrev').onclick=()=>{calOffset--;vCalendar()}; $('#calNext').onclick=()=>{calOffset++;vCalendar()}; $('#calNow')?.addEventListener('click',()=>{calOffset=0;vCalendar()});
+}
+
+// ---------- TORAH ----------
+let torahIdx=null;
+async function vTorah(){
+  const mid=new Date(); mid.setHours(0,0,0,0);
+  const curW=portionFor(mid); if(torahIdx===null) torahIdx=PORTIONS.indexOf(curW);
+  const w=PORTIONS[torahIdx];
+  const read=ACT?.read?.[w.date];
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div class="row" style="justify-content:space-between">
+    <div><div class="eyebrow">Shabbat ${esc(fmtG(parseISO(w.date),{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}${w===curW?' · this week':''}</div>
+    <h2>${esc(portionTitle(w))} ${w.hebrew?`<span style="font-weight:500;color:var(--muted)" lang="he">${esc(w.hebrew)}</span>`:''}</h2>
+    <div class="muted">${esc(PARASHA_MEANING[w.parasha]||'')}${w.special?' · '+esc(w.special):''}${!w.parasha?' · no weekly portion this Shabbat because of the feast':''}</div></div>
+    <div class="row"><button class="btn ghost sm" id="tPrev">← Previous</button><button class="btn ghost sm" id="tNow">This week</button><button class="btn ghost sm" id="tNext">Next →</button></div>
+   </div>
+   <div class="card row" style="justify-content:space-between">
+     <div class="small"><b>Torah</b> ${esc(w.torah)}<br><b>Haftarah</b> ${esc(w.haftarah)}</div>
+     <button class="btn ${read?'ghost':'gold'}" id="markRead">${read?'✓ Read this week':'Mark as read'}</button>
+   </div>
+   <div class="card" id="passage"><p class="muted">Opening the YAH Scriptures…</p></div>
+   <div class="card stack"><div class="eyebrow">All portions</div><div class="tablewrap"><table><thead><tr><th>Shabbat</th><th>Portion</th><th>Torah</th></tr></thead><tbody>
+   ${PORTIONS.filter(x=>x.date>=isoLocal(new Date(Date.now()-30*DAY))).slice(0,30).map(x=>`<tr><td>${esc(fmtG(parseISO(x.date),{day:'numeric',month:'short',year:'numeric'}))}</td><td><a href="#torah" data-pi="${PORTIONS.indexOf(x)}">${esc(portionTitle(x))}</a></td><td>${esc(x.torah)}</td></tr>`).join('')}
+   </tbody></table></div></div></div>`;
+  $('#tPrev').onclick=()=>{torahIdx=Math.max(0,torahIdx-1);vTorah()}; $('#tNext').onclick=()=>{torahIdx=Math.min(PORTIONS.length-1,torahIdx+1);vTorah()}; $('#tNow').onclick=()=>{torahIdx=null;vTorah()};
+  document.querySelectorAll('[data-pi]').forEach(a=>a.onclick=e=>{e.preventDefault();torahIdx=+a.dataset.pi;vTorah()});
+  $('#markRead').onclick=async()=>{ await saveAct({read:{...(ACT.read||{}),[w.date]:!read}}); vTorah(); };
+  await ensureScriptures();
+  const refs=parseRefs(w.torah); const hrefs=parseRefs(w.haftarah);
+  const P=await Promise.all(refs.map(passageHTML)), HP=await Promise.all(hrefs.map(passageHTML));
+  $('#passage').innerHTML=`<div class="eyebrow">Torah reading · YAH Scriptures</div>${P.join('')}
+    ${HP.length?`<hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><div class="eyebrow">Haftarah</div>${HP.join('')}`:''}`;
+}
+
+// ---------- SCRIPTURES ----------
+let sc={b:0,c:1,v:null};
+async function vScriptures(){
+  $('#app').innerHTML=`<div class="card"><p class="muted">Opening the YAH Scriptures…</p></div>`;
+  await ensureScriptures(); if(!SCR.length){ $('#app').innerHTML='<div class="card muted">The Scriptures have not been loaded yet. The administrator loads them once from Admin → Settings.</div>'; return; }
+  const b=await getBook(sc.b);
+  const sections=[['Torah',0,5],['Nevi’im · Prophets',5,27],['Ketuvim · Writings',27,39],['Renewed Covenant',39,66]];
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div class="card stack">
+    <div class="row" style="justify-content:space-between"><div class="eyebrow">Scriptures</div>
+     <div class="row small"><span class="pill gold">English · YAH Scriptures</span><span class="pill" title="Luganda text to be added">Luganda · coming</span></div></div>
+    <div class="row">
+     <label class="f" style="flex:2;min-width:180px">Book<select id="sBook">${sections.map(([n,a,z])=>`<optgroup label="${esc(n)}">${SCR.slice(a,z).map((x,i)=>`<option value="${a+i}" ${a+i===sc.b?'selected':''}>${esc(x.name)} · ${esc(x.heb)}</option>`).join('')}</optgroup>`).join('')}</select></label>
+     <label class="f" style="flex:1;min-width:90px">Chapter<select id="sCh">${b.chapters.map((_,i)=>`<option ${i+1===sc.c?'selected':''}>${i+1}</option>`).join('')}</select></label>
+     <label class="f" style="flex:1;min-width:90px">Verse<select id="sV"><option value="">All</option>${b.chapters[sc.c-1].map((_,i)=>`<option ${i+1===sc.v?'selected':''}>${i+1}</option>`).join('')}</select></label>
+    </div>
+    <form id="sGo" class="row"><input type="text" id="sRef" placeholder="Go to a reference, e.g. John 3:16 or Gen 23" style="flex:1;min-width:200px"><button class="btn sm">Go</button></form>
+   </div>
+   <div class="card">
+    <h2>${esc(b.name)} ${sc.c} <span class="muted" style="font-size:1rem;font-weight:500">${esc(b.heb)}</span></h2>
+    <p class="reader" style="margin-top:12px">${b.chapters[sc.c-1].map((t,i)=>`<span class="v${sc.v===i+1?' hl':''}" id="v${i+1}"><sup>${i+1}</sup>${nameText(t)} </span>`).join('')}</p>
+    <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn ghost sm" id="sPrev">← Previous chapter</button><button class="btn ghost sm" id="sNext">Next chapter →</button></div>
+   </div></div>`;
+  $('#sBook').onchange=e=>{sc={b:+e.target.value,c:1,v:null};vScriptures()};
+  $('#sCh').onchange=e=>{sc.c=+e.target.value;sc.v=null;vScriptures()};
+  $('#sV').onchange=e=>{sc.v=e.target.value?+e.target.value:null;vScriptures()};
+  $('#sPrev').onclick=async()=>{ if(sc.c>1)sc.c--; else if(sc.b>0){sc.b--;sc.c=(await getBook(sc.b)).chapters.length} sc.v=null; vScriptures() };
+  $('#sNext').onclick=()=>{ if(sc.c<b.chapters.length)sc.c++; else if(sc.b<65){sc.b++;sc.c=1} sc.v=null; vScriptures() };
+  $('#sGo').onsubmit=e=>{e.preventDefault(); const r=$('#sRef').value.trim(); const m=r.match(/^(\d?\s?[A-Za-z’' ]+?)\s*(\d+)(?::(\d+))?$/); if(!m) return toast('Try a form like “John 3:16”');
+    const q=m[1].toLowerCase().replace(/\s+/g,' ').trim(); const i=SCR.findIndex(x=>x.name.toLowerCase().startsWith(q)||x.heb.toLowerCase().startsWith(q)||x.name.toLowerCase().replace(' ','').startsWith(q.replace(' ','')));
+    if(i<0) return toast('Book not found'); sc={b:i,c:Math.min(+m[2],SCR[i].n),v:m[3]?+m[3]:null}; vScriptures(); };
+  if(sc.v) setTimeout(()=>document.getElementById('v'+sc.v)?.scrollIntoView({block:'center'}),50);
+}
+
+// ---------- HYMNS ----------
+let hymnSel=null, hymnQ='', hymnLang='all';
+async function ensureHymns(){ if(!HYMNS.length){ try{const s=await db.doc('texts/hymns').get(); if(s.exists) HYMNS=JSON.parse(s.data().list);}catch(e){} } }
+function hymnsMerged(){ return HYMNS.map(h=>{const e=CONTENT.hymnEdits?.[h.n+'|'+h.title]||CONTENT.hymnEdits?.[String(h.n)]; return e?{...h,...e}:h}); }
+async function vHymns(){
+  await ensureHymns(); const all=hymnsMerged();
+  if(hymnSel!==null){ const h=all[hymnSel];
+    $('#app').innerHTML=`<div class="stack" style="gap:16px"><div class="row"><button class="btn ghost sm" id="hBack">← All hymns</button>
+     <button class="btn ghost sm" id="hPrev" ${hymnSel===0?'disabled':''}>Previous</button><button class="btn ghost sm" id="hNext" ${hymnSel===all.length-1?'disabled':''}>Next</button></div>
+     <article class="card hymn stack"><div class="eyebrow">Hymn ${h.n} · ${{en:'English',lg:'Luganda',he:'Hebrew'}[h.lang]||''}</div><h2>${esc(h.title)}</h2><pre>${nameText(h.text)}</pre></article></div>`;
+    $('#hBack').onclick=()=>{hymnSel=null;vHymns()}; $('#hPrev').onclick=()=>{hymnSel--;vHymns()}; $('#hNext').onclick=()=>{hymnSel++;vHymns()};
+    return; }
+  const q=hymnQ.toLowerCase();
+  const list=all.map((h,i)=>({h,i})).filter(({h})=>(hymnLang==='all'||h.lang===hymnLang)&&(!q||String(h.n)===q||h.title.toLowerCase().includes(q)||h.text.toLowerCase().includes(q)));
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div class="row" style="justify-content:space-between"><div><div class="eyebrow">Hymn book</div><h2>House of Israel hymns</h2></div>
+   <div class="row"><input type="text" id="hQ" placeholder="Number, title or a line" value="${esc(hymnQ)}" style="width:240px">
+   <select id="hL" style="width:auto"><option value="all">All languages</option><option value="en" ${hymnLang==='en'?'selected':''}>English</option><option value="lg" ${hymnLang==='lg'?'selected':''}>Luganda</option><option value="he" ${hymnLang==='he'?'selected':''}>Hebrew</option></select></div></div>
+   <div class="list">${list.map(({h,i})=>`<button class="li" data-i="${i}"><span class="num">${h.n}</span><span style="flex:1">${esc(h.title)}</span><span class="pill">${{en:'EN',lg:'LG',he:'HE'}[h.lang]}</span></button>`).join('')||'<p class="muted" style="padding:14px">No hymn matches.</p>'}</div></div>`;
+  const hq=$('#hQ'); hq.oninput=e=>{hymnQ=e.target.value; const pos=hq.selectionStart; vHymns(); const n=$('#hQ'); n.focus(); n.setSelectionRange(pos,pos)};
+  $('#hL').onchange=e=>{hymnLang=e.target.value;vHymns()};
+  document.querySelectorAll('.li[data-i]').forEach(b=>b.onclick=()=>{hymnSel=+b.dataset.i;vHymns()});
+}
+
+// ---------- QUIZ ----------
+async function getQuiz(date){ try{const s=await db.doc('quizzes/'+date).get(); return s.exists?s.data():null}catch(e){return null} }
+function quizBlock(qs,key,date,done){
+  return qs.map((q,i)=>`<div class="q stack" data-q="${i}"><div><b>${i+1}.</b> ${nameText(q.q)}</div>
+    ${q.options.map((o,j)=>{const cls=done?(j===q.answer?' right':(done.answers?.[i]===j?' wrong':'')):'';return `<label class="opt${cls}"><input type="radio" name="${key}${i}" value="${j}" ${done?'disabled':''} ${done&&done.answers?.[i]===j?'checked':''}> <span>${nameText(o)}</span></label>`}).join('')}
+    ${done&&q.ref?`<div class="small muted">${esc(q.ref)}</div>`:''}</div>`).join('');
+}
+async function vQuiz(){
+  const mid=new Date(); mid.setHours(0,0,0,0); const w=portionFor(mid);
+  $('#app').innerHTML=`<div class="card"><p class="muted">Loading this week’s quiz…</p></div>`;
+  const quiz=await getQuiz(w.date);
+  const done=ACT?.quiz?.[w.date];
+  if(!quiz||!quiz.adult?.length){ $('#app').innerHTML=`<div class="card stack"><div class="eyebrow">Weekly quiz · ${esc(portionTitle(w))}</div><h2>This week’s quiz is being prepared</h2><p class="muted">Come back after Monday’s Torah portion email.</p></div>`; return; }
+  $('#app').innerHTML=`<div class="stack" style="gap:16px"><div class="card stack">
+    <div class="eyebrow">Weekly quiz · Shabbat ${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</div>
+    <h2>${esc(portionTitle(w))}: the details</h2>
+    <p class="muted small">Every answer is in this week’s portion (${esc(w.torah)}) in the YAH Scriptures. ${done?`You scored <b>${done.score} of ${done.total}</b>.`:''}</p>
+    <form id="qf" class="stack">${quizBlock(quiz.adult,'a',w.date,done)}
+    ${done?'':'<button class="btn gold" type="submit">Submit answers</button>'}</form></div></div>`;
+  $('#qf').onsubmit=async e=>{e.preventDefault();
+    const answers=quiz.adult.map((q,i)=>{const r=document.querySelector(`input[name=a${i}]:checked`);return r?+r.value:null});
+    if(answers.some(a=>a===null)) return toast('Answer every question first');
+    const score=answers.filter((a,i)=>a===quiz.adult[i].answer).length;
+    await saveAct({quiz:{...(ACT.quiz||{}),[w.date]:{score,total:answers.length,answers,at:Date.now()}}});
+    toast(`You scored ${score} of ${answers.length}`); vQuiz(); };
+}
+
+// ---------- KIDS ----------
+function makeWordSearch(words,size=12,seed=1){
+  let s=seed; const rnd=()=>{s=(s*16807)%2147483647;return (s-1)/2147483646};
+  const W=words.map(w=>w.toUpperCase().normalize('NFD').replace(/[^A-Z]/g,'')).filter(w=>w.length>=3&&w.length<=size);
+  const g=Array.from({length:size},()=>Array(size).fill(''));
+  const dirs=[[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0]]; const placed=[];
+  for(const w of W.sort((a,b)=>b.length-a.length)){
+    for(let t=0;t<300;t++){ const [dr,dc]=dirs[Math.floor(rnd()*(t<150?3:dirs.length))];
+      const r=Math.floor(rnd()*size), c=Math.floor(rnd()*size); const er=r+dr*(w.length-1), ec=c+dc*(w.length-1);
+      if(er<0||er>=size||ec<0||ec>=size) continue; let ok=true;
+      for(let i=0;i<w.length;i++){const x=g[r+dr*i][c+dc*i]; if(x&&x!==w[i]){ok=false;break}}
+      if(!ok) continue; const cells=[]; for(let i=0;i<w.length;i++){g[r+dr*i][c+dc*i]=w[i];cells.push((r+dr*i)*size+c+dc*i)} placed.push({w,cells}); break; }
+  }
+  const A='ABCDEFGHIJKLMNOPRSTUWY';
+  for(let r=0;r<size;r++)for(let c=0;c<size;c++) if(!g[r][c]) g[r][c]=A[Math.floor(rnd()*A.length)];
+  return {g,placed,size};
+}
+async function vKids(){
+  const mid=new Date(); mid.setHours(0,0,0,0); const w=portionFor(mid);
+  const quiz=await getQuiz(w.date);
+  const words=quiz?.words||[]; const ws=makeWordSearch(words,12,w.date.split('-').join('')%2147483647||7);
+  const found=new Set();
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div><div class="eyebrow">Children · ${esc(portionTitle(w))}</div><h2>Shabbat school corner</h2></div>
+   <div class="grid g2">
+    <div class="card stack"><div class="eyebrow">Ages 8–14 · Word search</div>
+     ${ws.placed.length?`<p class="small muted">Tap the first letter of a word, then its last letter.</p>
+     <div class="ws" id="ws" style="grid-template-columns:repeat(${ws.size},1fr)">${ws.g.flat().map((ch,i)=>`<button data-i="${i}" aria-label="${ch}">${ch}</button>`).join('')}</div>
+     <div class="words" id="wsWords">${ws.placed.map(p=>`<span class="pill" data-w="${p.w}">${p.w}</span>`).join('')}</div>`:'<p class="muted">This week’s word search is being prepared.</p>'}
+    </div>
+    <div class="card stack"><div class="eyebrow">Ages 8–14 · Questions</div>
+     ${quiz?.kids?.length?`<form id="kq" class="stack">${quizBlock(quiz.kids,'k',w.date,null)}<button class="btn gold" type="submit">Check my answers</button></form><p id="kres" class="small"></p>`:'<p class="muted">Questions coming soon.</p>'}
+    </div>
+    <div class="card stack"><div class="eyebrow">Ages 0–7 · Colouring</div><p>Two colouring pages from this week’s portion are printed for class each Shabbat.</p>${quiz?.coloring?`<p class="small">${esc(quiz.coloring)}</p>`:''}</div>
+   </div></div>`;
+  let first=null;
+  document.querySelectorAll('#ws button').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;
+    if(first===null){first=i;b.classList.add('sel');return}
+    const a=first; first=null; document.querySelectorAll('#ws .sel').forEach(x=>x.classList.remove('sel'));
+    const hit=ws.placed.find(p=>(p.cells[0]===a&&p.cells.at(-1)===i)||(p.cells[0]===i&&p.cells.at(-1)===a));
+    if(hit&&!found.has(hit.w)){ found.add(hit.w); hit.cells.forEach(c=>document.querySelector(`#ws [data-i="${c}"]`).classList.add('found')); document.querySelector(`[data-w="${hit.w}"]`).classList.add('done');
+      if(found.size===ws.placed.length) toast('You found every word!'); }
+  });
+  $('#kq')?.addEventListener('submit',e=>{e.preventDefault(); let s=0; quiz.kids.forEach((q,i)=>{const r=document.querySelector(`input[name=k${i}]:checked`); document.querySelectorAll(`input[name=k${i}]`).forEach(x=>{x.closest('.opt').classList.toggle('right',+x.value===q.answer)}); if(r&&+r.value===q.answer)s++; if(r&&+r.value!==q.answer) r.closest('.opt').classList.add('wrong');}); $('#kres').textContent=`${s} of ${quiz.kids.length} right.`});
+}
+
+// ---------- LIBRARY ----------
+function vLibrary(){
+  const items=[...(CONTENT.links.items||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const yt=CONTENT.settings.youtube;
+  $('#app').innerHTML=`<div class="stack" style="gap:16px">
+   <div><div class="eyebrow">Shabbat library</div><h2>Recorded Shabbat services and teachings</h2></div>
+   ${yt?`<a class="card row" href="${esc(yt)}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><span class="pill gold">YouTube</span><b>House of Israel channel</b><span class="muted small" style="margin-left:auto">Opens YouTube</span></a>`:'<div class="card muted">The House of Israel YouTube channel link will appear here.</div>'}
+   <div class="list">${items.map(x=>`<a class="li" href="${esc(x.url)}" target="_blank" rel="noopener"><span class="num" style="min-width:6.5em;font-size:.9rem">${esc(x.date?fmtG(parseISO(x.date),{day:'numeric',month:'short',year:'numeric'}):'')}</span><span style="flex:1">${esc(x.title)}</span>${x.kind?`<span class="pill">${esc(x.kind)}</span>`:''}</a>`).join('')||'<p class="muted" style="padding:14px">No Shabbat links yet.</p>'}</div></div>`;
+}
+
+// ---------- TEACHING ----------
+const CLASSES=[['t1','Teacher'],['t2','Teacher']];
+function upcomingShabbats(n){ const mid=new Date(); mid.setHours(0,0,0,0); const iso=isoLocal(mid); return PORTIONS.filter(w=>w.date>=iso).slice(0,n) }
+function vTeaching(){
+  const weeks=upcomingShabbats(12); const S=CONTENT.schedule.weeks||{};
+  $('#app').innerHTML=`<div class="stack" style="gap:16px"><div><div class="eyebrow">Shabbat school</div><h2>Teaching schedule</h2>
+   <p class="muted small">Teachers get an email on Sunday after Shabbat and a reminder on Wednesday, with the Torah portion to prepare.</p></div>
+   <div class="card tablewrap"><table><thead><tr><th>Shabbat</th><th>Portion</th>${CLASSES.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>
+   ${weeks.map(w=>{const s=S[w.date]||{};return `<tr><td>${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</td><td>${esc(portionTitle(w))}</td>${s.onHold?`<td colspan="3"><span class="pill warn">On hold</span> ${esc(s.note||'')}</td>`:CLASSES.map(([k])=>`<td>${esc(s[k]?.name||'—')}</td>`).join('')}</tr>`}).join('')}
+   </tbody></table></div></div>`;
+}
+
+// ---------- MY PROGRESS ----------
+function vMe(){
+  const a=ACT||{}; const reads=Object.values(a.read||{}).filter(Boolean).length; const qz=Object.values(a.quiz||{});
+  const avg=qz.length?Math.round(100*qz.reduce((s,x)=>s+x.score/x.total,0)/qz.length):0;
+  const recent=PORTIONS.filter(w=>w.date<=isoLocal(new Date(Date.now()+7*DAY))).slice(-10).reverse();
+  $('#app').innerHTML=`<div class="stack" style="gap:16px"><div><div class="eyebrow">My progress</div><h2>${esc(me.name||'Your')} dashboard</h2></div>
+   <div class="grid g3">
+    <div class="card"><div class="eyebrow">Visits</div><div class="big">${a.visits||0}</div><div class="muted small">${a.lastVisit?'Last on '+esc(fmtG(new Date(a.lastVisit))):''}</div></div>
+    <div class="card"><div class="eyebrow">Portions read</div><div class="big">${reads}</div></div>
+    <div class="card"><div class="eyebrow">Quizzes taken</div><div class="big">${qz.length}</div><div class="muted small">${qz.length?'Average '+avg+'%':''}</div></div>
+   </div>
+   <div class="card stack"><div class="eyebrow">Recent weeks</div>
+    ${recent.map(w=>{const q=a.quiz?.[w.date];return `<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><span><b>${esc(portionTitle(w))}</b> <span class="muted small">${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</span></span><span class="row">${a.read?.[w.date]?'<span class="pill good">Read</span>':'<span class="pill">Not read</span>'}${q?`<span class="pill gold">Quiz ${q.score}/${q.total}</span>`:''}</span></div>`}).join('')}
+   </div>
+   ${`<div class="card stack"><div class="eyebrow">${me.mustChange?'Set your own password':'Change password'}</div>
+    <form id="pwf" class="stack" style="max-width:380px"><label class="f">New password<input type="password" id="pw1" minlength="6" required autocomplete="new-password"></label>
+    <label class="f">Repeat new password<input type="password" id="pw2" minlength="6" required autocomplete="new-password"></label><button class="btn">Save password</button></form>
+    <button class="btn ghost sm" id="signout" style="align-self:flex-start">Sign out</button></div>`}
+  </div>`;
+  $('#pwf')?.addEventListener('submit',async e=>{e.preventDefault(); if($('#pw1').value!==$('#pw2').value) return toast('The two passwords differ');
+    try{ await auth.currentUser.updatePassword($('#pw1').value); if(me.mustChange){ try{ await db.doc('members/'+me.id).update({mustChange:false}); }catch(e){} me.mustChange=false; } toast('Password changed'); e.target.reset(); }
+    catch(err){ toast(err.code==='auth/requires-recent-login'?'For safety, sign out and sign in again, then change it.':'Could not change password: '+err.code) } });
+  $('#signout')?.addEventListener('click',()=>{ location.hash=''; auth.signOut(); });
+}
+
+// ---------- ADMIN ----------
+let adminTab='people';
+async function vAdmin(){
+  const tabs=[['people','Members & requests'],['quiz','Quiz builder'],['schedule','Teaching schedule'],['links','Library links'],['hymns','Edit hymns'],['settings','Settings & calendar']];
+  $('#app').innerHTML=`<div class="stack" style="gap:16px"><div><div class="eyebrow">Administrator</div><h2>Run the House</h2></div>
+   <div class="row">${tabs.map(([k,l])=>`<button class="btn sm ${adminTab===k?'':'ghost'}" data-t="${k}">${l}</button>`).join('')}</div><div id="adm"><p class="muted">Loading…</p></div></div>`;
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{adminTab=b.dataset.t;vAdmin()});
+  ({people:aPeople,quiz:aQuiz,schedule:aSchedule,links:aLinks,hymns:aHymns,settings:aSettings})[adminTab]();
+}
+async function saveContent(id,data){ CONTENT[id]=data; await db.doc('content/'+id).set(data); toast('Saved'); }
+async function aPeople(){
+  let apps=[],mem={},acts={};
+  try{ apps=(await db.collection('applications').get()).docs.map(d=>({id:d.id,...d.data()})) }catch(e){}
+  try{ (await db.collection('members').get()).docs.forEach(d=>mem[d.id]=d.data()) }catch(e){}
+  try{ (await db.collection('activity').get()).docs.forEach(d=>acts[d.id]=d.data()) }catch(e){}
+  const pending=apps.filter(a=>a.status==='pending'), declined=apps.filter(a=>a.status==='declined');
+  const members=Object.entries(mem).map(([uid,m])=>({uid,...m}));
+  const row=a=>{const x=acts[a.uid]||{};const q=Object.values(x.quiz||{});return `<tr><td><b>${esc(a.name)}</b>${a.revoked?' <span class="pill bad">Removed</span>':''}</td><td>${esc(a.email)}</td><td>${esc(a.phone)}</td><td>${x.visits||0}</td><td>${x.lastVisit?esc(fmtG(new Date(x.lastVisit))):'—'}</td><td>${Object.values(x.read||{}).filter(Boolean).length}</td><td>${q.length}</td><td>${a.revoked?`<button class="btn ghost sm" data-restore="${a.uid}">Restore</button>`:`<button class="btn ghost sm" data-revoke="${a.uid}">Remove</button>`}</td></tr>`};
+  $('#adm').innerHTML=`<div class="stack" style="gap:16px">
+   <div class="card stack"><div class="eyebrow">Waiting for approval · ${pending.length}</div>
+    ${pending.length?`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Applied</th><th></th></tr></thead><tbody>${pending.map(a=>`<tr><td><b>${esc(a.name)}</b></td><td>${esc(a.email)}</td><td>${esc(a.phone)}</td><td>${esc(fmtG(new Date(a.createdAt)))}</td><td class="row"><button class="btn sm" data-ok="${esc(a.id)}">Approve</button><button class="btn ghost sm" data-no="${esc(a.id)}">Decline</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="muted">No requests waiting.</p>'}</div>
+   <div class="card stack"><div class="eyebrow">Members with access · ${members.filter(m=>!m.revoked).length}</div>
+    ${members.length?`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Visits</th><th>Last visit</th><th>Read</th><th>Quizzes</th><th></th></tr></thead><tbody>${members.map(row).join('')}</tbody></table></div>`:'<p class="muted">No approved members yet.</p>'}</div>
+   ${declined.length?`<div class="card stack"><div class="eyebrow">Declined</div>${declined.map(a=>`<div class="row small">${esc(a.name)} (${esc(a.email)}) <button class="btn ghost sm" data-clear="${esc(a.id)}">Let them apply again</button></div>`).join('')}</div>`:''}
+  </div>`;
+  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async()=>{ b.disabled=true; b.textContent='Approving…';
+    const a=apps.find(x=>x.id===b.dataset.ok);
+    const sec=firebase.apps.find(x=>x.name==='approver')||firebase.initializeApp(FB_CONFIG,'approver');
+    try{
+      let cred; try{ cred=await sec.auth().createUserWithEmailAndPassword(a.email,FIRST_PASSWORD); }
+      catch(e){ if(e.code==='auth/email-already-in-use'){ cred=await sec.auth().signInWithEmailAndPassword(a.email,FIRST_PASSWORD); } else throw e; }
+      const uid=cred.user.uid; await sec.auth().signOut();
+      await db.doc('members/'+uid).set({name:a.name,email:a.email,phone:a.phone,approvedAt:Date.now(),mustChange:true});
+      await db.doc('applications/'+a.id).update({status:'approved',uid,approvedAt:Date.now()});
+      toast('Approved '+a.name+'. They can sign in now.'); aPeople();
+    }catch(e){ b.disabled=false; b.textContent='Approve'; toast(e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'?'This email already has a login with a changed password. Restore them from the members list.':'Could not approve: '+(e.code||e.message)); } });
+  document.querySelectorAll('[data-no]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.no).update({status:'declined'}); toast('Declined'); aPeople(); });
+  document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=async()=>{ await db.doc('applications/'+b.dataset.clear).delete(); toast('They can apply again'); aPeople(); });
+  document.querySelectorAll('[data-revoke]').forEach(b=>b.onclick=async()=>{ if(b.dataset.armed){ await db.doc('members/'+b.dataset.revoke).update({revoked:true}); toast('Access removed'); aPeople(); } else { b.dataset.armed=1; b.textContent='Confirm remove'; } });
+  document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async()=>{ await db.doc('members/'+b.dataset.restore).update({revoked:false}); toast('Access restored'); aPeople(); });
+}
+function quizToText(qs){ return (qs||[]).map(q=>`Q: ${q.q}\n${q.options.map((o,j)=>(j===q.answer?'* ':'- ')+o).join('\n')}${q.ref?`\nref: ${q.ref}`:''}`).join('\n\n') }
+function textToQuiz(t){ return t.split(/\n\s*\n/).map(b=>{const L=b.split('\n').map(x=>x.trim()).filter(Boolean); const q=(L.find(x=>/^Q:/i.test(x))||'').replace(/^Q:\s*/i,''); const opts=L.filter(x=>/^[*-]\s/.test(x)); const ref=(L.find(x=>/^ref:/i.test(x))||'').replace(/^ref:\s*/i,'');
+  return q&&opts.length>1?{q,options:opts.map(x=>x.slice(2).trim()),answer:Math.max(0,opts.findIndex(x=>x.startsWith('*'))),ref}:null}).filter(Boolean) }
+let quizWeek=null;
+async function aQuiz(){
+  const weeks=upcomingShabbats(10); if(!quizWeek) quizWeek=weeks[0].date; const w=PORTIONS.find(x=>x.date===quizWeek);
+  const qz=await getQuiz(quizWeek)||{};
+  $('#adm').innerHTML=`<div class="card stack">
+   <div class="row"><label class="f" style="max-width:320px">Week<select id="qw">${weeks.map(x=>`<option value="${x.date}" ${x.date===quizWeek?'selected':''}>${esc(fmtG(parseISO(x.date),{day:'numeric',month:'short'}))} · ${esc(portionTitle(x))}</option>`).join('')}</select></label>
+   <span class="muted small">${esc(w.torah)}</span></div>
+   <p class="small muted">One question per block. Start with <b>Q:</b>, list options with <b>-</b>, mark the right one with <b>*</b>, then an optional <b>ref:</b> line. Every answer must come from this week’s portion in the YAH Scriptures.</p>
+   ${sample?`<div class="row"><button class="btn gold sm" id="draftAdult">Draft adult questions from the portion</button><button class="btn ghost sm" id="draftKids">Draft children’s questions & words</button><span class="small muted" id="draftMsg"></span></div>`:''}
+   <label class="f">Adult quiz (hard detail questions; the first three go in the Monday email)<textarea id="qa" style="min-height:280px">${esc(quizToText(qz.adult))}</textarea></label>
+   <label class="f">Children 8–14 questions<textarea id="qk">${esc(quizToText(qz.kids))}</textarea></label>
+   <label class="f">Word-search words (one per line)<textarea id="qwds" style="min-height:100px">${esc((qz.words||[]).join('\n'))}</textarea></label>
+   <label class="f">Colouring pages note (ages 0–7)<input type="text" id="qcol" value="${esc(qz.coloring||'')}"></label>
+   <div class="row"><button class="btn" id="qsave">Save quiz</button><span class="small muted">${qz.adult?.length?qz.adult.length+' adult questions saved':''}</span></div></div>`;
+  $('#qw').onchange=e=>{quizWeek=e.target.value;aQuiz()};
+  $('#qsave').onclick=async()=>{ const data={adult:textToQuiz($('#qa').value),kids:textToQuiz($('#qk').value),words:$('#qwds').value.split('\n').map(x=>x.trim()).filter(Boolean),coloring:$('#qcol').value.trim(),portion:portionTitle(w),updatedAt:Date.now()};
+    try{ await db.doc('quizzes/'+quizWeek).set(data); toast(`Saved ${data.adult.length} adult and ${data.kids.length} children’s questions`);}catch(e){toast('Could not save')} };
+  const draft=async(kind)=>{ await ensureScriptures(); const text=parseRefs(w.torah).map(r=>{const b=SCR[bookIndex(r.book)];let s='';for(let c=r.c1;c<=r.c2;c++){const ch=b.chapters[c-1];const vs=c===r.c1?r.v1:1,ve=c===r.c2?r.v2:ch.length;for(let v=vs;v<=ve;v++)s+=`${b.name} ${c}:${v} ${ch[v-1].replace(/⟨H⟩/g,'YHWH').replace(/⟨Y⟩/g,'Yahushua')}\n`}return s}).join('');
+    const prev=Object.keys(ACT?.quiz||{}).length;
+    const ask=kind==='adult'?`Write 12 multiple-choice questions for adults on the Torah portion below. Ask for precise details (numbers, names, places, objects, who said what) and make them harder than an average Bible quiz. Use ONLY facts stated in this text and its exact spellings; no interpretation, no outside knowledge. Each question has 4 options with exactly one correct. Output only in this format, a blank line between questions:\nQ: question\n* correct option\n- wrong option\n- wrong option\n- wrong option\nref: Book chapter:verse\n(Shuffle where the * line appears.)`
+      :`Write 8 simple multiple-choice questions for children aged 8–14 on the Torah portion below, using ONLY facts and exact spellings from this text. Same format as: Q: …, options with * for the right one and - for others, ref: line, blank line between. After the questions write a line WORDS: followed by 14 single words from the text (names, places, objects) for a word search, comma separated.`;
+    $('#draftMsg').textContent='Drafting… this can take a minute.';
+    try{ const r=await sample(`${ask}\n\nTEXT (YAH Scriptures):\n${text}`,{modelTier:'default',cache:false});
+      let out=r.text.trim();
+      if(kind==='adult'){ $('#qa').value=out; } else { const m=out.match(/WORDS:\s*(.+)$/m); if(m){ $('#qwds').value=m[1].split(',').map(x=>x.trim()).join('\n'); out=out.replace(/WORDS:.+$/m,'').trim(); } $('#qk').value=out; }
+      $('#draftMsg').textContent='Draft ready. Check each answer against the text, then save.'; }catch(e){ $('#draftMsg').textContent='Could not draft: '+(e.message||e.code); } };
+  $('#draftAdult')?.addEventListener('click',()=>draft('adult')); $('#draftKids')?.addEventListener('click',()=>draft('kids'));
+}
+function aSchedule(){
+  const weeks=upcomingShabbats(16); const S=JSON.parse(JSON.stringify(CONTENT.schedule.weeks||{}));
+  $('#adm').innerHTML=`<div class="card stack"><p class="small muted">Name and email for each class. Teachers are emailed on Sunday and reminded on Wednesday. Tick “On hold” for feast weeks.</p>
+   <div class="tablewrap"><table><thead><tr><th>Shabbat</th>${CLASSES.map(c=>`<th>${c[1]}</th>`).join('')}<th>On hold</th></tr></thead><tbody>
+   ${weeks.map(w=>{const s=S[w.date]||{};return `<tr data-d="${w.date}"><td style="min-width:120px"><b>${esc(fmtG(parseISO(w.date),{day:'numeric',month:'short'}))}</b><br><span class="small muted">${esc(portionTitle(w))}</span></td>
+     ${CLASSES.map(([k])=>`<td style="min-width:170px"><input type="text" data-k="${k}" data-f="name" placeholder="Name" value="${esc(s[k]?.name||'')}"><input type="email" data-k="${k}" data-f="email" placeholder="Email" value="${esc(s[k]?.email||'')}" style="margin-top:4px"></td>`).join('')}
+     <td><input type="checkbox" data-hold ${s.onHold?'checked':''}><input type="text" data-note placeholder="Note" value="${esc(s.note||'')}" style="margin-top:4px;min-width:120px"></td></tr>`}).join('')}
+   </tbody></table></div><button class="btn" id="schSave" style="align-self:flex-start">Save schedule</button></div>`;
+  $('#schSave').onclick=async()=>{ document.querySelectorAll('tr[data-d]').forEach(tr=>{const d=tr.dataset.d; const s={}; tr.querySelectorAll('input[data-k]').forEach(i=>{s[i.dataset.k]=s[i.dataset.k]||{}; s[i.dataset.k][i.dataset.f]=i.value.trim()}); s.onHold=tr.querySelector('[data-hold]').checked; s.note=tr.querySelector('[data-note]').value.trim(); S[d]=s;});
+    await saveContent('schedule',{weeks:S}); };
+}
+function aLinks(){
+  const items=[...(CONTENT.links.items||[])];
+  const draw=()=>{ $('#adm').innerHTML=`<div class="card stack">
+    <form id="lf" class="row"><input type="text" id="lt" placeholder="Title, e.g. Shabbat service · Chayei Sarah" required style="flex:2;min-width:200px"><input type="url" id="lu" placeholder="https://…" required style="flex:2;min-width:200px"><input type="date" id="ld" style="flex:1;min-width:140px"><select id="lk" style="flex:1;min-width:120px"><option>Service</option><option>Teaching</option><option>Torah</option><option>Music</option></select><button class="btn">Add</button></form>
+    <div class="list">${items.map((x,i)=>`<div class="li"><span style="flex:1">${esc(x.title)} <span class="small muted">${esc(x.date||'')}</span></span><button class="btn ghost sm" data-del="${i}">Remove</button></div>`).join('')||'<p class="muted" style="padding:12px">No links yet.</p>'}</div></div>`;
+    $('#lf').onsubmit=async e=>{e.preventDefault(); items.unshift({title:$('#lt').value.trim(),url:$('#lu').value.trim(),date:$('#ld').value,kind:$('#lk').value}); await saveContent('links',{items}); draw();};
+    document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{items.splice(+b.dataset.del,1); await saveContent('links',{items}); draw();}); };
+  draw();
+}
+async function aHymns(){
+  await ensureHymns(); const all=hymnsMerged(); if(!all.length){ $('#adm').innerHTML='<div class="card muted">Load the hymn book first (Settings tab).</div>'; return; }
+  $('#adm').innerHTML=`<div class="card stack"><label class="f">Hymn<select id="eh">${all.map((h,i)=>`<option value="${i}">${h.n}. ${esc(h.title)}</option>`).join('')}</select></label>
+   <div class="row"><label class="f" style="width:110px">Number<input type="number" id="ehn"></label><label class="f" style="flex:1">Title<input type="text" id="eht"></label><label class="f" style="width:150px">Language<select id="ehl"><option value="en">English</option><option value="lg">Luganda</option><option value="he">Hebrew</option></select></label></div>
+   <label class="f">Words<textarea id="ehx" style="min-height:360px;font-family:var(--display);font-size:1rem"></textarea></label>
+   <button class="btn" id="ehs" style="align-self:flex-start">Save hymn</button></div>`;
+  const load=()=>{const h=all[+$('#eh').value]; $('#ehn').value=h.n; $('#eht').value=h.title; $('#ehl').value=h.lang; $('#ehx').value=h.text}; load(); $('#eh').onchange=load;
+  $('#ehs').onclick=async()=>{ const base=HYMNS[+$('#eh').value]; const edits={...(CONTENT.hymnEdits||{})}; edits[base.n+'|'+base.title]={n:+$('#ehn').value,title:$('#eht').value.trim(),lang:$('#ehl').value,text:$('#ehx').value}; await saveContent('hymnEdits',edits); };
+}
+function aSettings(){
+  const s={...CONTENT.settings}; const cal={anchors:[],leap:[],...CONTENT.calendar};
+  $('#adm').innerHTML=`<div class="grid g2">
+   <div class="card stack"><div class="eyebrow">Contacts & links</div>
+    <label class="f">YouTube channel link<input type="url" id="sy" value="${esc(s.youtube||'')}"></label>
+    <label class="f">Printing: name<input type="text" id="spn" value="${esc(s.printerName||'Julius Ariyong')}"></label>
+    <label class="f">Printing: email<input type="email" id="spe" value="${esc(s.printerEmail||'')}"></label>
+    <label class="f">Administrator email (receives requests and Monday quiz reminders)<input type="email" id="sae" value="${esc(s.adminEmail||'')}"></label>
+    <button class="btn" id="ss" style="align-self:flex-start">Save</button></div>
+   <div class="card stack"><div class="eyebrow">Load House data</div>
+    <p class="small muted">Loads the YAH Scriptures, the hymn book and the starting schedule and quiz from the House data file. Do this once; loading again replaces the texts.</p>
+    <input type="file" id="dataFile" accept=".json,application/json"><span class="small" id="dataMsg"></span></div>
+   <div class="card stack"><div class="eyebrow">Moon calendar corrections</div>
+    <p class="small muted">The count runs from the full moon of 27 October 2026. If a new month is sighted on a different day, record it here and every later date follows it.</p>
+    <div class="row"><label class="f">Day 1 is<input type="date" id="cad"></label><label class="f" style="width:110px">Month no.<input type="number" id="cam" min="1" max="13"></label><button class="btn sm" id="caadd" style="align-self:flex-end">Add</button></div>
+    <ul class="small">${cal.anchors.map((a,i)=>`<li>Day 1 of month ${a.month}: ${esc(fmtG(parseISO(a.date)))} <button class="btn ghost sm" data-ca="${i}">Remove</button></li>`).join('')||'<li class="muted">No corrections yet.</li>'}</ul>
+    <label class="f">13th-month years: date of day 1 of the 13th month<input type="date" id="cleap"></label><button class="btn ghost sm" id="cleapadd" style="align-self:flex-start">Add 13th month</button>
+    <ul class="small">${cal.leap.map((d,i)=>`<li>${esc(fmtG(parseISO(d)))} <button class="btn ghost sm" data-cl="${i}">Remove</button></li>`).join('')}</ul></div></div>`;
+  $('#dataFile').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; const msg=$('#dataMsg'); msg.textContent='Reading…';
+    try{ const D=JSON.parse(await f.text()); let n=0;
+      const books=D.scriptures; await db.doc('texts/scr_index').set({books:books.map(b=>({name:b.name,heb:b.heb,n:b.chapters.length,vc:b.chapters.map(c=>c.length)}))});
+      for(let i=0;i<books.length;i++){ await db.doc('texts/scr_'+String(i).padStart(2,'0')).set({name:books[i].name,chapters:JSON.stringify(books[i].chapters)}); n++; msg.textContent=`Scriptures: ${n} of ${books.length} books…`; }
+      await db.doc('texts/hymns').set({list:JSON.stringify(D.hymns)}); msg.textContent='Hymns loaded…';
+      for(const [id,v] of Object.entries(D.content||{})){ const ex=await db.doc('content/'+id).get(); if(!ex.exists) await db.doc('content/'+id).set(v); }
+      for(const [id,v] of Object.entries(D.quizzes||{})){ const ex=await db.doc('quizzes/'+id).get(); if(!ex.exists) await db.doc('quizzes/'+id).set(v); }
+      SCR=null; HYMNS=[]; await loadContent(); msg.textContent='All House data loaded.'; toast('House data loaded');
+    }catch(err){ msg.textContent='Could not load: '+(err.message||err.code); } };
+  $('#ss').onclick=()=>saveContent('settings',{youtube:$('#sy').value.trim(),printerName:$('#spn').value.trim(),printerEmail:$('#spe').value.trim(),adminEmail:$('#sae').value.trim()});
+  const saveCal=async()=>{ await saveContent('calendar',cal); ANCHORS=[DEFAULT_ANCHOR,...cal.anchors]; LEAP_AFTER12=cal.leap; aSettings(); };
+  $('#caadd').onclick=()=>{ if(!$('#cad').value||!$('#cam').value) return toast('Choose a date and month'); cal.anchors.push({date:$('#cad').value,month:+$('#cam').value}); saveCal(); };
+  $('#cleapadd').onclick=()=>{ if(!$('#cleap').value) return; cal.leap.push($('#cleap').value); saveCal(); };
+  document.querySelectorAll('[data-ca]').forEach(b=>b.onclick=()=>{cal.anchors.splice(+b.dataset.ca,1);saveCal()});
+  document.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{cal.leap.splice(+b.dataset.cl,1);saveCal()});
+}
+
+boot();
+</script>
+</body></html>
