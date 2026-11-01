@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#1d5a46">
-<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="House of Israel"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="manifest" href="manifest.json">
 <title>House of Israel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700;900&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans+Phoenician&display=swap">
@@ -113,6 +113,7 @@ th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mu
 .gate{max-width:460px;margin:40px auto}
 .bar{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;border:1px solid var(--line)}
 .bar i{display:block;height:100%;background:var(--gold)}
+@media (max-width:560px){.rail a{padding:11px 14px;font-size:.95rem}.mast h1{font-size:1.3rem}.logo{width:46px;height:46px}main{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}
 </style>
@@ -927,6 +928,23 @@ function aSettings(){
   document.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{cal.leap.splice(+b.dataset.cl,1);saveCal()});
 }
 
+// ---------- install as an app ----------
+let deferredInstall=null;
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; showInstall(); });
+function isStandalone(){ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true }
+function showInstall(){
+  if(isStandalone()||document.getElementById('installBar')) return;
+  try{ if(localStorage.getItem('hoi_install_dismissed')) return; }catch(e){}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(!deferredInstall&&!ios) return;
+  const b=document.createElement('div'); b.id='installBar'; b.className='toast'; b.style.cssText='display:flex;gap:10px;align-items:center;flex-wrap:wrap;max-width:92vw';
+  b.innerHTML=ios?'<span>Add House of Israel to your home screen: tap <b>Share</b> then <b>Add to Home Screen</b>.</span><button class="btn sm ghost" id="ibX">OK</button>':'<span>Install the House of Israel app on this device?</span><button class="btn sm gold" id="ibGo">Install</button><button class="btn sm ghost" id="ibX">Not now</button>';
+  document.body.appendChild(b);
+  b.querySelector('#ibGo')?.addEventListener('click',async()=>{ b.remove(); deferredInstall.prompt(); deferredInstall=null; });
+  b.querySelector('#ibX').addEventListener('click',()=>{ b.remove(); try{localStorage.setItem('hoi_install_dismissed','1')}catch(e){} });
+}
+setTimeout(showInstall,4000);
 boot();
 </script>
 </body></html>
