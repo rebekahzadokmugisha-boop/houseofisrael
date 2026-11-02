@@ -64,9 +64,10 @@ textarea{min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font
 .pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--surface2);border:1px solid var(--line)}
 .pill.gold{background:var(--gold-soft);border-color:var(--gold);color:var(--ink)}
 .pill.good{color:var(--good);border-color:var(--good)} .pill.warn{color:var(--warn);border-color:var(--warn)} .pill.bad{color:var(--bad);border-color:var(--bad)}
+.yhwh{font-variant:small-caps;letter-spacing:.06em;font-weight:700;color:var(--flag)}
 .paleo{font-family:var(--paleo);unicode-bidi:isolate;direction:rtl;font-size:1.05em;color:var(--flag);white-space:nowrap}
-:root[data-theme="dark"] .paleo{color:var(--gold)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .paleo{color:var(--gold)}}
+:root[data-theme="dark"] .paleo,:root[data-theme="dark"] .yhwh{color:var(--gold)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .paleo,:root:not([data-theme="light"]) .yhwh{color:var(--gold)}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;z-index:50;max-width:90vw}
 /* moon */
 .moonhero{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;background:linear-gradient(160deg,var(--flag) 0%,var(--flag-deep) 100%);color:var(--on-flag);border-radius:18px;padding:22px;border:0}
@@ -291,9 +292,10 @@ const PARASHA_MEANING={"Bereshit":"In the beginning","Noach":"Rest / Noah","Lech
 async function loadJSON(p){const r=await fetch(p);if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
 async function ensureScriptures(){ if(!SCR){ const s=await db.doc('texts/scr_index').get(); SCR=s.exists?s.data().books.map(b=>({...b,chapters:null})):[]; } return SCR }
 async function getBook(i){ await ensureScriptures(); if(!SCR[i]) return null; if(!SCR[i].chapters){ const s=await db.doc('texts/scr_'+String(i).padStart(2,'0')).get(); SCR[i].chapters=s.exists?JSON.parse(s.data().chapters):[]; } return SCR[i] }
-function nameText(t){ // YAH Scriptures restored names, shown in the Paleo-Hebrew letters as printed
+function nameText(t){ // YAH Scriptures restored names: every printed form of the Name shows as YHWH
+  t=String(t??'').replace(/(^|[^A-Za-z])[hH]W[hH]Y(?![A-Za-z])/g,'$1⟨H⟩').replace(/[\[{][vfV]HWY/g,'⟨Y⟩');
   return esc(t).replace(/(“|‘)?\s*⟨H⟩\s*(?=[,.;:!?’”])/g,(m,q)=>(q||'')+'⟨H⟩').replace(/(“|‘)\s+⟨/g,'$1⟨')
-    .replace(/⟨H⟩/g,'<span class="paleo" title="YHWH">𐤉𐤄𐤅𐤄</span>')
+    .replace(/⟨H⟩/g,'<span class="yhwh" title="YHWH">YHWH</span>')
     .replace(/⟨Y⟩/g,'<span class="paleo" title="Yahushua">𐤉𐤄𐤅𐤔𐤏</span>');
 }
 function portionFor(dateMidnight){ // the Shabbat on or after the date
