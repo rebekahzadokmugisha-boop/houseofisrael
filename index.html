@@ -343,11 +343,24 @@ function wirePicker(rerender){ document.querySelectorAll('#lp [data-l]').forEach
 async function saveKidResult(date,res){ const L=learner(); if(!L) return; const k={...(ACT.kids||{})}; k[L.id]={...(k[L.id]||{}),[date]:{...res,at:Date.now()}}; await saveAct({kids:k}); }
 const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['give','Giving'],['me','My progress']];
 let started=false;
+// Everyone is signed out at the end of each day (midnight, Kampala time).
+const kampalaDay=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kampala'}).format(new Date());
+function endOfDayCheck(){
+  if(!auth||!auth.currentUser) return false;
+  let d=null; try{ d=localStorage.getItem('hoi_day'); }catch(e){}
+  const today=kampalaDay();
+  if(!d){ try{ localStorage.setItem('hoi_day',today); }catch(e){} return false; }
+  if(d!==today){ try{ localStorage.removeItem('hoi_day'); }catch(e){} auth.signOut(); setTimeout(()=>toast('You were signed out at the end of the day. Please sign in again.'),300); return true; }
+  return false;
+}
+setInterval(endOfDayCheck,60000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) endOfDayCheck(); });
 async function boot(){
   try{ PORTIONS=await loadJSON('portions.json'); }catch(e){ console.warn(e) }
   firebase.initializeApp(FB_CONFIG); db=firebase.firestore(); auth=firebase.auth();
   auth.onAuthStateChanged(async u=>{
-    if(!u){ started=false; $('#rail').hidden=true; $('#who').innerHTML=''; return renderAuth(); }
+    if(!u){ started=false; $('#rail').hidden=true; $('#who').innerHTML=''; try{localStorage.removeItem('hoi_day')}catch(e){} return renderAuth(); }
+    if(endOfDayCheck()) return;
     me={id:u.uid,email:(u.email||'').toLowerCase(),name:''}; isOwner=ADMINS.includes(me.email);
     if(!isOwner){ let m=null; try{ m=await db.doc('members/'+u.uid).get(); }catch(e){}
       if(!m||!m.exists||m.data().revoked){ await auth.signOut(); return renderAuth('signin','Your access has not been approved yet. You will be able to sign in once the administrator approves your request.'); }
