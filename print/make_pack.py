@@ -6,10 +6,9 @@ quiz.json holds: date (YYYY-MM-DD), portion, torah (reference), adult[], kids[],
 coloring (notes) and optionally scenes: [{"title": "...", "ref": "Gen 24:20", "motifs": ["well","camel",...]}].
 Each question: {"q", "options"[], "answer" (index), "ref"}.
 
-Makes three print-ready A4 PDFs:
+Makes two print-ready A4 PDFs (adult quizzes are online only):
   HOI-<date>-ages-0-7-colouring.pdf   two colouring pages + a colour-the-name page
   HOI-<date>-ages-8-14-puzzles.pdf    word search, questions with Scripture references, teacher's key
-  HOI-<date>-adults-quiz.pdf          detail quiz with references, teacher's key
 """
 import json, os, sys, random, math
 from reportlab.lib.pagesizes import A4
@@ -363,7 +362,8 @@ def adults(Q, path):
 def main():
     Q = json.load(open(sys.argv[1])); out = sys.argv[2]; os.makedirs(out, exist_ok=True)
     d = Q['date']; files = []
-    for name, fn in ((f'HOI-{d}-ages-0-7-colouring.pdf', colouring), (f'HOI-{d}-ages-8-14-puzzles.pdf', puzzles), (f'HOI-{d}-adults-quiz.pdf', adults)):
+    # Adult quizzes are never printed: they live only on the website for members who sign in.
+    for name, fn in ((f'HOI-{d}-ages-0-7-colouring.pdf', colouring), (f'HOI-{d}-ages-8-14-puzzles.pdf', puzzles)):
         p = os.path.join(out, name); fn(Q, p); files.append(p)
     print('\n'.join(files))
 
