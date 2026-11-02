@@ -296,7 +296,7 @@ function nameText(t){ // YAH Scriptures restored names: every printed form of th
   t=String(t??'').replace(/(^|[^A-Za-z])[hH]W[hH]Y(?![A-Za-z])/g,'$1⟨H⟩').replace(/[\[{][vfV]HWY/g,'⟨Y⟩');
   return esc(t).replace(/(⟨[HY]⟩)\s+(?=[,.;:!?’”])/g,'$1').replace(/([“‘])\s+⟨/g,'$1⟨')
     .replace(/⟨H⟩/g,'<span class="yhwh" title="YHWH">YHWH</span>')
-    .replace(/⟨Y⟩/g,'<span class="paleo" title="Yahushua">𐤉𐤄𐤅𐤔𐤏</span>');
+    .replace(/⟨Y⟩/g,'<span class="yhwh" title="Yeshua">Yeshua</span>');
 }
 function portionFor(dateMidnight){ // the Shabbat on or after the date
   const iso=isoLocal(dateMidnight);
