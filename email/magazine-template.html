@@ -1,0 +1,64 @@
+<!-- House of Israel magazine email template.
+Fill the {{…}} slots. Keep every style inline (Gmail drops <style>). No external images (they are stripped).
+Palettes – pick by email type:
+  portion  (Monday Torah portion):  band #1d5a46  accent #b9862a  paper #f6f3ea  tint #e7efe9
+  teacher  (teacher notices):       band #123d30  accent #c8963e  paper #f3f6f1  tint #dfe9e2
+  print    (printing pack):         band #6b2d3c  accent #d4a24c  paper #fbf6ef  tint #f3e6d6
+  digest   (admin summaries):       band #24425c  accent #c9a25a  paper #f4f6f8  tint #e3e9ef
+  welcome  (new member, requests):  band #1d5a46  accent #d4a24c  paper #fbf8ef  tint #f1e9cf
+-->
+<div style="margin:0;padding:24px 0;background:{{paper}};font-family:Georgia,'Times New Roman',serif;color:#16241e">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #d9e0da">
+  <!-- masthead -->
+  <tr><td style="background:{{band}};padding:26px 30px 20px">
+    <div style="font:700 11px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:{{accent}}">★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★ ★</div>
+    <div style="font:700 30px/1.15 Georgia,serif;color:#f4efe0;margin-top:8px">House of Israel</div>
+    <div style="font:13px/1.5 Arial,Helvetica,sans-serif;color:#f4efe0;opacity:.85">{{issue_line}}</div>
+  </td></tr>
+  <tr><td style="height:5px;background:{{accent}}"></td></tr>
+  <!-- cover story -->
+  <tr><td style="padding:28px 30px 8px">
+    <div style="font:700 11px/1.4 Arial,Helvetica,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:{{accent}}">{{kicker}}</div>
+    <h1 style="font:700 34px/1.12 Georgia,serif;margin:6px 0 4px;color:{{band}}">{{headline}}</h1>
+    <div style="font:italic 17px/1.5 Georgia,serif;color:#56685f">{{standfirst}}</div>
+  </td></tr>
+  <!-- pull quote / key verse -->
+  <tr><td style="padding:16px 30px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{{tint}};border-left:5px solid {{accent}};border-radius:8px"><tr><td style="padding:18px 20px">
+      <div style="font:20px/1.6 'Times New Roman',serif;direction:rtl;text-align:right;color:{{band}}">{{hebrew}}</div>
+      <div style="font:italic 15px/1.6 Georgia,serif;color:#56685f;margin-top:6px">{{transliteration}}</div>
+      <div style="font:17px/1.6 Georgia,serif;margin-top:6px">“{{verse}}”</div>
+      <div style="font:700 12px/1.4 Arial,Helvetica,sans-serif;color:{{accent}};margin-top:8px;letter-spacing:.06em">{{verse_ref}}</div>
+    </td></tr></table>
+  </td></tr>
+  <!-- two-column facts -->
+  <tr><td style="padding:6px 30px 10px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td width="50%" valign="top" style="padding:12px 10px 12px 0;border-top:2px solid {{band}}">
+        <div style="font:700 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#56685f">Torah</div>
+        <div style="font:700 18px/1.4 Georgia,serif;color:{{band}}">{{torah}}</div></td>
+      <td width="50%" valign="top" style="padding:12px 0 12px 10px;border-top:2px solid {{accent}}">
+        <div style="font:700 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#56685f">Haftarah</div>
+        <div style="font:700 18px/1.4 Georgia,serif;color:{{band}}">{{haftarah}}</div></td>
+    </tr></table>
+  </td></tr>
+  <!-- feature article -->
+  <tr><td style="padding:8px 30px 4px;font:16px/1.7 Georgia,serif">{{article_html}}</td></tr>
+  <!-- boxed section (quiz / list / actions) -->
+  <tr><td style="padding:14px 30px">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:{{band}};border-radius:12px"><tr><td style="padding:20px 22px;color:#f4efe0">
+      <div style="font:700 11px Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:{{accent}}">{{box_kicker}}</div>
+      <div style="font:700 22px/1.3 Georgia,serif;margin:4px 0 10px">{{box_title}}</div>
+      <div style="font:15px/1.65 Georgia,serif">{{box_html}}</div>
+    </td></tr></table>
+  </td></tr>
+  <!-- call to action -->
+  <tr><td align="center" style="padding:10px 30px 26px">
+    <a href="{{cta_url}}" style="display:inline-block;background:{{accent}};color:#1b1505;font:700 15px Arial,Helvetica,sans-serif;text-decoration:none;padding:13px 26px;border-radius:30px">{{cta_label}}</a>
+  </td></tr>
+  <!-- footer -->
+  <tr><td style="background:{{tint}};padding:16px 30px;font:12px/1.6 Arial,Helvetica,sans-serif;color:#56685f">
+    {{credit_line}}<br>House of Israel · Kampala · <a href="https://rebekahzadokmugisha-boop.github.io/houseofisrael/" style="color:{{band}}">Members’ home</a>
+  </td></tr>
+</table>
+</div>
