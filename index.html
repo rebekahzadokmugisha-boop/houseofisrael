@@ -294,7 +294,7 @@ async function ensureScriptures(){ if(!SCR){ const s=await db.doc('texts/scr_ind
 async function getBook(i){ await ensureScriptures(); if(!SCR[i]) return null; if(!SCR[i].chapters){ const s=await db.doc('texts/scr_'+String(i).padStart(2,'0')).get(); SCR[i].chapters=s.exists?JSON.parse(s.data().chapters):[]; } return SCR[i] }
 function nameText(t){ // YAH Scriptures restored names: every printed form of the Name shows as YHWH
   t=String(t??'').replace(/(^|[^A-Za-z])[hH]W[hH]Y(?![A-Za-z])/g,'$1⟨H⟩').replace(/[\[{][vfV]HWY/g,'⟨Y⟩');
-  return esc(t).replace(/(“|‘)?\s*⟨H⟩\s*(?=[,.;:!?’”])/g,(m,q)=>(q||'')+'⟨H⟩').replace(/(“|‘)\s+⟨/g,'$1⟨')
+  return esc(t).replace(/(⟨[HY]⟩)\s+(?=[,.;:!?’”])/g,'$1').replace(/([“‘])\s+⟨/g,'$1⟨')
     .replace(/⟨H⟩/g,'<span class="yhwh" title="YHWH">YHWH</span>')
     .replace(/⟨Y⟩/g,'<span class="paleo" title="Yahushua">𐤉𐤄𐤅𐤔𐤏</span>');
 }
