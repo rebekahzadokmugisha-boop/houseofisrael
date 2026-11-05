@@ -360,7 +360,7 @@ function learnerPicker(){
 }
 function wirePicker(rerender){ document.querySelectorAll('#lp [data-l]').forEach(b=>b.onclick=()=>{ learnerId=b.dataset.l||null; rerender(); }); }
 async function saveKidResult(date,res){ const L=learner(); if(!L) return; const k={...(ACT.kids||{})}; k[L.id]={...(k[L.id]||{}),[date]:{...res,at:Date.now()}}; await saveAct({kids:k}); }
-const routes=[['home','Home'],['calendar','Moon calendar'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['give','Giving'],['me','My progress']];
+const routes=[['home','Home'],['calendar','Omwezi'],['torah','Torah portion'],['scriptures','Scriptures'],['hymns','Hymn book'],['quiz','Weekly quiz'],['kids','Children'],['library','Shabbat library'],['teaching','Shabbat school'],['give','Giving'],['me','My progress']];
 let started=false;
 // Everyone is signed out at the end of each day (midnight, Kampala time).
 const kampalaDay=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Kampala'}).format(new Date());
@@ -570,7 +570,7 @@ function vCalendar(){
   const feastList=[]; for(let d=0;d<cur.len;d++){const g=new Date(start.getTime()+d*DAY); const m=moonDayFor(g); for(const e of feastsOn(m)) if(e!=='New month') feastList.push(`<li><b>Day ${m.day}</b> (${esc(fmtG(g))}) · ${esc(e)}</li>`)}
   $('#app').innerHTML=`<div class="stack" style="gap:16px">${calOffset===0?heroMoonHTML():''}
    <div class="row" style="justify-content:space-between">
-     <div><div class="eyebrow">Moon calendar</div><h2>The ${ordinal(cur.month)} month</h2>
+     <div><div class="eyebrow">Omwezi · moon calendar</div><h2>The ${ordinal(cur.month)} month</h2>
      <div class="muted small">${esc(fmtG(g0,{day:'numeric',month:'long'}))} – ${esc(fmtG(g1,{day:'numeric',month:'long',year:'numeric'}))} · ${cur.len} days · each day begins at the sunset before</div></div>
      <div class="row"><button class="btn ghost sm" id="calPrev">← Previous month</button>${calOffset?'<button class="btn ghost sm" id="calNow">This month</button>':''}<button class="btn ghost sm" id="calNext">Next month →</button></div>
    </div>
@@ -988,7 +988,7 @@ function aSettings(){
    <div class="card stack"><div class="eyebrow">Load House data</div>
     <p class="small muted">Loads the YAH Scriptures, the hymn book and the starting schedule and quiz from the House data file. Do this once; loading again replaces the texts.</p>
     <input type="file" id="dataFile" accept=".json,application/json"><span class="small" id="dataMsg"></span></div>
-   <div class="card stack"><div class="eyebrow">Moon calendar corrections</div>
+   <div class="card stack"><div class="eyebrow">Omwezi corrections</div>
     <p class="small muted">The count runs from the full moon of 27 October 2026. If a new month is sighted on a different day, record it here and every later date follows it.</p>
     <div class="row"><label class="f">Day 1 is<input type="date" id="cad"></label><label class="f" style="width:110px">Month no.<input type="number" id="cam" min="1" max="13"></label><button class="btn sm" id="caadd" style="align-self:flex-end">Add</button></div>
     <ul class="small">${cal.anchors.map((a,i)=>`<li>Day 1 of month ${a.month}: ${esc(fmtG(parseISO(a.date)))} <button class="btn ghost sm" data-ca="${i}">Remove</button></li>`).join('')||'<li class="muted">No corrections yet.</li>'}</ul>
