@@ -33,7 +33,7 @@ service cloud.firestore {
     }
     match /feedback/{id} { allow read, write: if isAdmin(); }
     match /texts/{id} { allow read: if isMember() || isAdmin(); allow write: if isAdmin(); }
-      // Zadokite Study (family study app at /zadokite-study/)
+    // Zadokite Study (family study app at /zadokite-study/)
     function isFamily() { return signedIn() && (request.auth.token.email == 'family@zadokite.study' || isAdmin()); }
     match /zadokite_attempts/{id} { allow read, create: if isFamily(); allow update, delete: if isAdmin(); }
     match /zadokite/{doc} { allow read, write: if isFamily(); }
