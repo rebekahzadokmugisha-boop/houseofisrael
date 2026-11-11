@@ -108,6 +108,7 @@ textarea{min-height:140px;font-family:ui-monospace,Menlo,Consolas,monospace;font
 .reader sup{font-family:var(--body);font-size:.7rem;color:var(--gold);font-weight:700;margin-right:3px;vertical-align:super}
 .reader .v{scroll-margin-top:90px}
 .reader .v.hl{background:var(--gold-soft);border-radius:4px}
+mark{background:var(--gold-soft);color:inherit;border-radius:3px;padding:0 1px}
 .hymn pre{white-space:pre-wrap;font-family:var(--display);font-size:1.12rem;line-height:1.6;margin:0}
 .list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
 .list button.li,.list a.li{display:flex;gap:12px;align-items:baseline;text-align:left;padding:11px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;cursor:pointer;color:inherit;text-decoration:none}
@@ -308,7 +309,18 @@ const BOOK_ALIASES={'I Samuel':'1 Samuel','II Samuel':'2 Samuel','I Kings':'1 Ki
 const PARASHA_MEANING={"Bereshit":"In the beginning","Noach":"Rest / Noah","Lech-Lecha":"Go forth","Vayera":"And He appeared","Chayei Sara":"The life of Sarah","Toldot":"Generations","Vayetzei":"And he went out","Vayishlach":"And he sent","Vayeshev":"And he settled","Miketz":"At the end","Vayigash":"And he drew near","Vayechi":"And he lived","Shemot":"Names","Vaera":"And I appeared","Bo":"Come","Beshalach":"When he let go","Yitro":"Jethro","Mishpatim":"Judgments","Terumah":"Offering","Tetzaveh":"You shall command","Ki Tisa":"When you take","Vayakhel":"And he assembled","Pekudei":"Accounts","Vayakhel-Pekudei":"And he assembled · Accounts","Vayikra":"And He called","Tzav":"Command","Shmini":"Eighth","Tazria":"She conceives","Metzora":"Leper","Tazria-Metzora":"She conceives · Leper","Achrei Mot":"After the death","Kedoshim":"Holy ones","Achrei Mot-Kedoshim":"After the death · Holy ones","Emor":"Speak","Behar":"On the mount","Bechukotai":"In My statutes","Behar-Bechukotai":"On the mount · In My statutes","Bamidbar":"In the wilderness","Nasso":"Lift up","Beha'alotcha":"When you set up","Sh'lach":"Send","Korach":"Korah","Chukat":"Statute","Balak":"Balak","Chukat-Balak":"Statute · Balak","Pinchas":"Phinehas","Matot":"Tribes","Masei":"Journeys","Matot-Masei":"Tribes · Journeys","Devarim":"Words","Vaetchanan":"And I pleaded","Eikev":"Because","Re'eh":"See","Shoftim":"Judges","Ki Teitzei":"When you go out","Ki Tavo":"When you come in","Nitzavim":"Standing","Vayeilech":"And he went","Nitzavim-Vayeilech":"Standing · And he went","Ha'azinu":"Listen","Vezot Haberakhah":"And this is the blessing"};
 async function loadJSON(p){const r=await fetch(p);if(!r.ok)throw new Error(p+' '+r.status);return r.json()}
 async function ensureScriptures(){ if(!SCR){ const s=await db.doc('texts/scr_index').get(); SCR=s.exists?s.data().books.map(b=>({...b,chapters:null})):[]; } return SCR }
-async function getBook(i){ await ensureScriptures(); if(!SCR[i]) return null; if(!SCR[i].chapters){ const s=await db.doc('texts/scr_'+String(i).padStart(2,'0')).get(); SCR[i].chapters=s.exists?JSON.parse(s.data().chapters):[]; } return SCR[i] }
+// Books are kept on the phone after the first download, so searching all 66 books doesn't use data every time.
+const scrIDB={db:null,open(){ if(this.db) return this.db; this.db=new Promise(res=>{ try{ const r=indexedDB.open('hoi-scr',1); r.onupgradeneeded=()=>r.result.createObjectStore('b'); r.onsuccess=()=>res(r.result); r.onerror=()=>res(null);}catch(e){res(null)} }); return this.db },
+  async get(k){ const d=await this.open(); if(!d) return null; return new Promise(res=>{ try{ const q=d.transaction('b').objectStore('b').get(k); q.onsuccess=()=>res(q.result||null); q.onerror=()=>res(null);}catch(e){res(null)} }) },
+  async put(k,v){ const d=await this.open(); if(!d) return; try{ d.transaction('b','readwrite').objectStore('b').put(v,k);}catch(e){} } };
+function scrSig(i){ const b=SCR[i]; return b.name+'|'+(b.vc||[]).join(',') }
+async function getBook(i){ await ensureScriptures(); if(!SCR[i]) return null;
+  if(!SCR[i].chapters){ const key='scr_'+String(i).padStart(2,'0'), sig=scrSig(i); const c=await scrIDB.get(key);
+    if(c&&c.sig===sig) SCR[i].chapters=c.chapters;
+    else { const s=await db.doc('texts/'+key).get(); SCR[i].chapters=s.exists?JSON.parse(s.data().chapters):[]; if(s.exists) scrIDB.put(key,{sig,chapters:SCR[i].chapters}); } }
+  return SCR[i] }
+async function getAllBooks(onProgress){ await ensureScriptures(); let done=0; const idx=SCR.map((_,i)=>i); const run=async()=>{ while(idx.length){ const i=idx.shift(); await getBook(i); done++; onProgress&&onProgress(done,SCR.length);} };
+  await Promise.all([run(),run(),run(),run(),run(),run()]); }
 function nameText(t){ // YAH Scriptures restored names: every printed form of the Name shows as YHWH
   t=String(t??'').replace(/(^|[^A-Za-z])[hH]W[hH]Y(?![A-Za-z])/g,'$1⟨H⟩').replace(/[\[{][vfV]HWY/g,'⟨Y⟩');
   return esc(t).replace(/(⟨[HY]⟩)\s+(?=[,.;:!?’”])/g,'$1').replace(/([“‘])\s+⟨/g,'$1⟨')
@@ -617,36 +629,90 @@ async function vTorah(){
 
 // ---------- SCRIPTURES ----------
 let sc={b:0,c:1,v:null};
+let srch={q:'',sec:'all',res:null,shown:50,open:false};
+const SCR_SECTIONS=[['Torah',0,5],['Nevi’im · Prophets',5,27],['Ketuvim · Writings',27,39],['Renewed Covenant',39,66]];
+function plainScr(t){ // the verse as members read it: restored names shown as YHWH / Yeshua
+  return String(t??'').replace(/(^|[^A-Za-z])[hH]W[hH]Y(?![A-Za-z])/g,'$1YHWH').replace(/[\[{][vfV]HWY/g,'Yeshua').replace(/\s+([,.;:!?’”])/g,'$1'); }
+function normScr(t){ return ' '+String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[’‘`]/g,"'").replace(/[^a-z0-9']+/g,' ').replace(/'/g,'').trim()+' '; }
+function findRef(r){ // "John 3:16", "Gen 23", "1 Kings 2:3" → {b,c,v} or null
+  const m=r.match(/^(\d?\s?[A-Za-z’' ]+?)\s*(\d+)(?::(\d+))?\s*$/); if(!m) return null;
+  const q=m[1].toLowerCase().replace(/\s+/g,' ').trim(); if(!q) return null;
+  const i=SCR.findIndex(x=>x.name.toLowerCase().startsWith(q)||x.heb.toLowerCase().startsWith(q)||x.name.toLowerCase().replace(/ /g,'').startsWith(q.replace(/ /g,'')));
+  if(i<0) return null; return {b:i,c:Math.max(1,Math.min(+m[2],SCR[i].n)),v:m[3]?+m[3]:null}; }
+function hlScr(text,words){ let h=esc(String(text).normalize('NFD')); if(!words.length) return h.normalize('NFC');
+  const pat=words.map(w=>w.split('').map(ch=>ch.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+"[\\u0300-\\u036f’']?").join('')).sort((a,b)=>b.length-a.length).join('|');
+  try{ return h.replace(new RegExp('(?<![A-Za-z])('+pat+')','gi'),'<mark>$1</mark>').normalize('NFC'); }catch(e){ return h.normalize('NFC'); } }
+async function runScrSearch(q){
+  const nq=normScr(q).trim(); const words=nq.split(' ').filter(Boolean); if(!words.length) return;
+  srch={...srch,q,res:null,shown:50,open:true}; vScriptures();
+  await getAllBooks((d,n)=>{ const el=$('#sProg'); if(el) el.textContent=`Searching the Scriptures… ${d} of ${n} books`; });
+  const [a,z]=srch.sec==='all'?[0,66]:SCR_SECTIONS[+srch.sec].slice(1);
+  const phrase=' '+nq+' ', exact=[], all=[];
+  for(let b=a;b<z&&b<SCR.length;b++){ const ch=SCR[b].chapters||[]; for(let c=0;c<ch.length;c++) for(let v=0;v<ch[c].length;v++){
+    const n=normScr(plainScr(ch[c][v]));
+    if(n.includes(phrase)) exact.push({b,c:c+1,v:v+1});
+    else if(words.length>1 && words.every(w=>n.includes(' '+w+' '))) all.push({b,c:c+1,v:v+1}); } }
+  // a single word also finds longer forms (e.g. "bless" → blessed, blessing) after the exact matches
+  const part=[]; if(words.length===1&&words[0].length>=3){ for(let b=a;b<z&&b<SCR.length;b++){ const ch=SCR[b].chapters||[]; for(let c=0;c<ch.length;c++) for(let v=0;v<ch[c].length;v++){
+    const n=normScr(plainScr(ch[c][v])); if(!n.includes(phrase)&&n.includes(' '+words[0])) part.push({b,c:c+1,v:v+1}); } } }
+  srch.res={exact,all,part,words}; if(location.hash.slice(1)==='scriptures') vScriptures(); }
+function scrResultsHTML(){
+  const R=srch.res; if(!R) return `<div class="card"><p class="muted" id="sProg">Searching the Scriptures…</p><p class="small muted">The first search downloads the books to this phone, so it takes a moment. After that it is quick.</p></div>`;
+  const list=[...R.exact.map(x=>({...x,k:'e'})),...R.all.map(x=>({...x,k:'a'})),...R.part.map(x=>({...x,k:'p'}))];
+  const total=list.length, secName=srch.sec==='all'?'all 66 books':SCR_SECTIONS[+srch.sec][0];
+  if(!total) return `<div class="card stack"><div class="row" style="justify-content:space-between"><div class="eyebrow">Search</div><button class="btn ghost sm" id="sClose">Close search</button></div>
+    <p>No verses found for <b>“${esc(srch.q)}”</b> in ${esc(secName)}.</p><p class="small muted">Try fewer words, a different spelling (for example Mosheh, Dawiḏ, Yisra’ĕl), or search all books.</p></div>`;
+  let lastK=''; const rows=list.slice(0,srch.shown).map((x,i)=>{ const t=plainScr(SCR[x.b].chapters[x.c-1][x.v-1]);
+    const head=x.k!==lastK&&(R.all.length||R.part.length)?`<div class="small muted" style="padding:10px 14px 6px;background:var(--surface2);border-bottom:1px solid var(--line);font-weight:700">${x.k==='e'?(R.words.length>1?'Exact phrase':'Exact word'):x.k==='a'?'All the words, not side by side':'Longer forms of the word'}</div>`:''; lastK=x.k;
+    return `${head}<button class="li" data-r="${x.b},${x.c},${x.v}" style="flex-direction:column;align-items:stretch;gap:4px"><span class="small" style="font-weight:700;color:var(--gold)">${esc(SCR[x.b].name)} ${x.c}:${x.v}</span><span style="font-family:var(--display);line-height:1.5">${hlScr(t,R.words)}</span></button>`; }).join('');
+  return `<div class="card stack">
+    <div class="row" style="justify-content:space-between"><div class="eyebrow">Search · ${total} verse${total===1?'':'s'}</div><button class="btn ghost sm" id="sClose">Close search</button></div>
+    <p class="small muted">Results for <b>“${esc(srch.q)}”</b> in ${esc(secName)}. Tap a verse to read it in its chapter.</p>
+    <div class="list">${rows}</div>
+    ${total>srch.shown?`<button class="btn ghost sm" id="sMore">Show more (${total-srch.shown} left)</button>`:''}
+  </div>`; }
 async function vScriptures(){
-  $('#app').innerHTML=`<div class="card"><p class="muted">Opening the YAH Scriptures…</p></div>`;
+  if(!SCR||!SCR.length) $('#app').innerHTML=`<div class="card"><p class="muted">Opening the YAH Scriptures…</p></div>`;
   await ensureScriptures(); if(!SCR.length){ $('#app').innerHTML='<div class="card muted">The Scriptures have not been loaded yet. The administrator loads them once from Admin → Settings.</div>'; return; }
   const b=await getBook(sc.b);
-  const sections=[['Torah',0,5],['Nevi’im · Prophets',5,27],['Ketuvim · Writings',27,39],['Renewed Covenant',39,66]];
+  const sections=SCR_SECTIONS;
   $('#app').innerHTML=`<div class="stack" style="gap:16px">
    <div class="card stack">
     <div class="row" style="justify-content:space-between"><div class="eyebrow">Scriptures</div>
      <div class="row small"><span class="pill gold">English · YAH Scriptures</span><span class="pill" title="Luganda text to be added">Luganda · coming</span></div></div>
+    <form id="sGo" class="stack" style="gap:8px">
+     <div class="row"><input type="search" id="sRef" value="${esc(srch.q)}" placeholder="Search a word or phrase, or go to John 3:16" style="flex:1;min-width:200px" enterkeyhint="search"><button class="btn sm">Search</button></div>
+     <div class="row small" style="gap:6px"><span class="muted">Look in:</span>
+      <select id="sSec" style="width:auto;padding:4px 8px"><option value="all">All books</option>${sections.map(([n],i)=>`<option value="${i}" ${String(i)===srch.sec?'selected':''}>${esc(n)}</option>`).join('')}</select></div>
+    </form>
     <div class="row">
      <label class="f" style="flex:2;min-width:180px">Book<select id="sBook">${sections.map(([n,a,z])=>`<optgroup label="${esc(n)}">${SCR.slice(a,z).map((x,i)=>`<option value="${a+i}" ${a+i===sc.b?'selected':''}>${esc(x.name)} · ${esc(x.heb)}</option>`).join('')}</optgroup>`).join('')}</select></label>
      <label class="f" style="flex:1;min-width:90px">Chapter<select id="sCh">${b.chapters.map((_,i)=>`<option ${i+1===sc.c?'selected':''}>${i+1}</option>`).join('')}</select></label>
      <label class="f" style="flex:1;min-width:90px">Verse<select id="sV"><option value="">All</option>${b.chapters[sc.c-1].map((_,i)=>`<option ${i+1===sc.v?'selected':''}>${i+1}</option>`).join('')}</select></label>
     </div>
-    <form id="sGo" class="row"><input type="text" id="sRef" placeholder="Go to a reference, e.g. John 3:16 or Gen 23" style="flex:1;min-width:200px"><button class="btn sm">Go</button></form>
    </div>
-   <div class="card">
+   ${srch.open?scrResultsHTML():''}
+   ${srch.open?'':`<div class="card">
+    ${srch.res?`<button class="btn ghost sm" id="sBackRes" style="margin-bottom:10px">← Back to results for “${esc(srch.q)}”</button>`:''}
     <h2>${esc(b.name)} ${sc.c} <span class="muted" style="font-size:1rem;font-weight:500">${esc(b.heb)}</span></h2>
     <p class="reader" style="margin-top:12px">${b.chapters[sc.c-1].map((t,i)=>`<span class="v${sc.v===i+1?' hl':''}" id="v${i+1}"><sup>${i+1}</sup>${nameText(t)} </span>`).join('')}</p>
     <div class="row" style="justify-content:space-between;margin-top:12px"><button class="btn ghost sm" id="sPrev">← Previous chapter</button><button class="btn ghost sm" id="sNext">Next chapter →</button></div>
-   </div></div>`;
-  $('#sBook').onchange=e=>{sc={b:+e.target.value,c:1,v:null};vScriptures()};
-  $('#sCh').onchange=e=>{sc.c=+e.target.value;sc.v=null;vScriptures()};
-  $('#sV').onchange=e=>{sc.v=e.target.value?+e.target.value:null;vScriptures()};
-  $('#sPrev').onclick=async()=>{ if(sc.c>1)sc.c--; else if(sc.b>0){sc.b--;sc.c=(await getBook(sc.b)).chapters.length} sc.v=null; vScriptures() };
-  $('#sNext').onclick=()=>{ if(sc.c<b.chapters.length)sc.c++; else if(sc.b<65){sc.b++;sc.c=1} sc.v=null; vScriptures() };
-  $('#sGo').onsubmit=e=>{e.preventDefault(); const r=$('#sRef').value.trim(); const m=r.match(/^(\d?\s?[A-Za-z’' ]+?)\s*(\d+)(?::(\d+))?$/); if(!m) return toast('Try a form like “John 3:16”');
-    const q=m[1].toLowerCase().replace(/\s+/g,' ').trim(); const i=SCR.findIndex(x=>x.name.toLowerCase().startsWith(q)||x.heb.toLowerCase().startsWith(q)||x.name.toLowerCase().replace(' ','').startsWith(q.replace(' ','')));
-    if(i<0) return toast('Book not found'); sc={b:i,c:Math.min(+m[2],SCR[i].n),v:m[3]?+m[3]:null}; vScriptures(); };
-  if(sc.v) setTimeout(()=>document.getElementById('v'+sc.v)?.scrollIntoView({block:'center'}),50);
+   </div>`}</div>`;
+  const read=()=>{srch.open=false;};
+  $('#sBook').onchange=e=>{read();sc={b:+e.target.value,c:1,v:null};vScriptures()};
+  $('#sCh').onchange=e=>{read();sc.c=+e.target.value;sc.v=null;vScriptures()};
+  $('#sV').onchange=e=>{read();sc.v=e.target.value?+e.target.value:null;vScriptures()};
+  $('#sSec').onchange=e=>{srch.sec=e.target.value; if(srch.q&&srch.open) runScrSearch(srch.q)};
+  if($('#sPrev')) $('#sPrev').onclick=async()=>{ if(sc.c>1)sc.c--; else if(sc.b>0){sc.b--;sc.c=(await getBook(sc.b)).chapters.length} sc.v=null; vScriptures() };
+  if($('#sNext')) $('#sNext').onclick=()=>{ if(sc.c<b.chapters.length)sc.c++; else if(sc.b<65){sc.b++;sc.c=1} sc.v=null; vScriptures() };
+  $('#sGo').onsubmit=e=>{e.preventDefault(); const r=$('#sRef').value.trim(); if(!r) return;
+    const ref=findRef(r); if(ref){ srch.open=false; sc=ref; vScriptures(); return; }
+    runScrSearch(r); };
+  $('#sClose')?.addEventListener('click',()=>{srch.open=false;vScriptures()});
+  $('#sBackRes')?.addEventListener('click',()=>{srch.open=true;vScriptures();});
+  $('#sMore')?.addEventListener('click',()=>{srch.shown+=50;vScriptures()});
+  document.querySelectorAll('[data-r]').forEach(el=>el.onclick=()=>{ const [bb,cc,vv]=el.dataset.r.split(',').map(Number); sc={b:bb,c:cc,v:vv}; srch.open=false; vScriptures(); });
+  if(!srch.open&&sc.v) setTimeout(()=>document.getElementById('v'+sc.v)?.scrollIntoView({block:'center'}),50);
 }
 
 // ---------- HYMNS ----------

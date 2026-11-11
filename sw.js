@@ -1,5 +1,5 @@
 // House of Israel – offline shell. Pages and data from Firebase stay live; the app shell opens without signal.
-const CACHE='hoi-v6';
+const CACHE='hoi-v7';
 const SHELL=['./','./index.html','./portions.json','./manifest.json','./icon.svg','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim();});
