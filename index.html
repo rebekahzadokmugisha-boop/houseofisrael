@@ -443,6 +443,9 @@ async function enterApp(firstLogin){
   $('#rail').hidden=false;
   const navItems=[...routes]; if(isOwner) navItems.push(['admin','Admin']);
   $('#nav').innerHTML=navItems.map(([id,l])=>`<a href="#${id}" data-r="${id}">${esc(l)}</a>`).join('');
+  $('#nav').onclick=e=>{ const a=e.target.closest('a[data-r]'); if(!a) return; e.preventDefault();
+    if(a.dataset.r==='scriptures') srch.open=srch.open&&!!srch.res;
+    if(location.hash==='#'+a.dataset.r) route(); else location.hash=a.dataset.r; };
   $('#who').innerHTML=`<span class="small">${esc(me.name||'Member')}</span>${isOwner?'<span class="pill gold">Admin</span>':''}`;
   await trackVisit();
   window.addEventListener('hashchange',route);
@@ -467,8 +470,12 @@ function route(){
   document.querySelectorAll('#nav a').forEach(a=>{ if(a.dataset.r===r) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
   const v={home:vHome,calendar:vCalendar,torah:vTorah,scriptures:vScriptures,hymns:vHymns,quiz:vQuiz,kids:vKids,library:vLibrary,teaching:vTeaching,give:vGive,me:vMe,admin:vAdmin}[r]||vHome;
   if(r==='admin'&&!isOwner) return vHome();
-  window.scrollTo(0,0); v();
+  window.scrollTo(0,0);
+  try{ const p=v(); if(p&&p.catch) p.catch(e=>viewFailed(r,e)); }catch(e){ viewFailed(r,e); }
 }
+function viewFailed(r,e){ console.error('page '+r,e); if((location.hash||'#home').slice(1)!==r) return;
+  $('#app').innerHTML=`<div class="card stack"><p>This page did not open properly.</p><button class="btn sm" id="vRetry">Try again</button></div>`;
+  $('#vRetry').onclick=()=>route(); }
 
 // ---------- breastplate feature card (Exodus 28:17-21) ----------
 const STONES=[ // [stone, colour, light, tribe] rows as in Exodus 28:17-20; tribes in birth order
@@ -664,7 +671,7 @@ function scrResultsHTML(){
     <p>No verses found for <b>“${esc(srch.q)}”</b> in ${esc(secName)}.</p><p class="small muted">Try fewer words, a different spelling (for example Mosheh, Dawiḏ, Yisra’ĕl), or search all books.</p></div>`;
   let lastK=''; const rows=list.slice(0,srch.shown).map((x,i)=>{ const t=plainScr(SCR[x.b].chapters[x.c-1][x.v-1]);
     const head=x.k!==lastK&&(R.all.length||R.part.length)?`<div class="small muted" style="padding:10px 14px 6px;background:var(--surface2);border-bottom:1px solid var(--line);font-weight:700">${x.k==='e'?(R.words.length>1?'Exact phrase':'Exact word'):x.k==='a'?'All the words, not side by side':'Longer forms of the word'}</div>`:''; lastK=x.k;
-    return `${head}<button class="li" data-r="${x.b},${x.c},${x.v}" style="flex-direction:column;align-items:stretch;gap:4px"><span class="small" style="font-weight:700;color:var(--gold)">${esc(SCR[x.b].name)} ${x.c}:${x.v}</span><span style="font-family:var(--display);line-height:1.5">${hlScr(t,R.words)}</span></button>`; }).join('');
+    return `${head}<button class="li" data-vref="${x.b},${x.c},${x.v}" style="flex-direction:column;align-items:stretch;gap:4px"><span class="small" style="font-weight:700;color:var(--gold)">${esc(SCR[x.b].name)} ${x.c}:${x.v}</span><span style="font-family:var(--display);line-height:1.5">${hlScr(t,R.words)}</span></button>`; }).join('');
   return `<div class="card stack">
     <div class="row" style="justify-content:space-between"><div class="eyebrow">Search · ${total} verse${total===1?'':'s'}</div><button class="btn ghost sm" id="sClose">Close search</button></div>
     <p class="small muted">Results for <b>“${esc(srch.q)}”</b> in ${esc(secName)}. Tap a verse to read it in its chapter.</p>
@@ -673,8 +680,11 @@ function scrResultsHTML(){
   </div>`; }
 async function vScriptures(){
   if(!SCR||!SCR.length) $('#app').innerHTML=`<div class="card"><p class="muted">Opening the YAH Scriptures…</p></div>`;
-  await ensureScriptures(); if(!SCR.length){ $('#app').innerHTML='<div class="card muted">The Scriptures have not been loaded yet. The administrator loads them once from Admin → Settings.</div>'; return; }
-  const b=await getBook(sc.b);
+  await ensureScriptures(); if((location.hash||'').slice(1)!=='scriptures') return;
+  if(!Number.isInteger(sc.b)||sc.b<0||sc.b>=SCR.length||!Number.isInteger(sc.c)||sc.c<1){ sc={b:0,c:1,v:null}; }
+  if(!SCR.length){ $('#app').innerHTML='<div class="card muted">The Scriptures have not been loaded yet. The administrator loads them once from Admin → Settings.</div>'; return; }
+  const b=await getBook(sc.b); if((location.hash||'').slice(1)!=='scriptures') return;
+  if(!b.chapters[sc.c-1]){ sc.c=1; sc.v=null; }
   const sections=SCR_SECTIONS;
   $('#app').innerHTML=`<div class="stack" style="gap:16px">
    <div class="card stack">
@@ -711,7 +721,7 @@ async function vScriptures(){
   $('#sClose')?.addEventListener('click',()=>{srch.open=false;vScriptures()});
   $('#sBackRes')?.addEventListener('click',()=>{srch.open=true;vScriptures();});
   $('#sMore')?.addEventListener('click',()=>{srch.shown+=50;vScriptures()});
-  document.querySelectorAll('[data-r]').forEach(el=>el.onclick=()=>{ const [bb,cc,vv]=el.dataset.r.split(',').map(Number); sc={b:bb,c:cc,v:vv}; srch.open=false; vScriptures(); });
+  $('#app').querySelectorAll('[data-vref]').forEach(el=>el.onclick=()=>{ const [bb,cc,vv]=el.dataset.vref.split(',').map(Number); sc={b:bb,c:cc,v:vv}; srch.open=false; vScriptures(); });
   if(!srch.open&&sc.v) setTimeout(()=>document.getElementById('v'+sc.v)?.scrollIntoView({block:'center'}),50);
 }
 
